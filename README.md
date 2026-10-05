@@ -33,6 +33,11 @@ npm start                   # Metro; abrir desde la development build en el celu
 | `npm run db:reset` | Recrea la base local aplicando migraciones y `seed.sql` |
 | `npm run db:test` | Tests de la base (pgTAP) |
 | `npm run db:types` | Regenera `src/types/database.ts` desde la base local |
+| `npm run functions:serve` | Sirve las Edge Functions locales (ej. eliminar cuenta) |
+| `npm test` | Tests de la lógica de la app (Jest) |
+| `npm run start:go` | Metro para abrir con Expo Go (mientras no haya development build) |
+
+Los mails locales (códigos de registro y de contraseña) se ven en http://localhost:54324.
 
 ## Development build
 

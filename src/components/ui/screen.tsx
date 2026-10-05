@@ -1,5 +1,9 @@
 import { ScrollView, View, type ViewProps } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView as RNSafeAreaView } from 'react-native-safe-area-context';
+import { withUniwind } from 'uniwind';
+
+// Uniwind solo aplica className a los componentes de React Native; los de terceros se envuelven.
+const SafeAreaView = withUniwind(RNSafeAreaView);
 
 type Props = ViewProps & { scroll?: boolean };
 

@@ -110,7 +110,7 @@ Si cierra la app a mitad del onboarding, al volver sigue desde el paso donde que
 **Tablas** (ver doc 04): `profiles`, `cities`, `interests`, `profile_interests`.
 
 Campos agregados respecto del doc 04:
-- `profiles.onboarding_step` (int): para retomar el onboarding.
+- ~~`profiles.onboarding_step`~~ → **no hace falta**: el paso se deduce de lo que ya está cargado (nombre, nacimiento, foto, ciudad, intereses). Mismo resultado para AC-10, sin un dato más que mantener. Se agrega `onboarding_completed_at`.
 - `profiles.terms_accepted_at` (timestamptz).
 
 **Storage**: bucket `avatars`, una carpeta por usuario (`avatars/<user_id>/...`).

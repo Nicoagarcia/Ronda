@@ -91,6 +91,133 @@ export type Database = {
         }
         Relationships: []
       }
+      group_members: {
+        Row: {
+          decided_at: string | null
+          group_id: string
+          joined_at: string | null
+          rejoin_after: string | null
+          requested_at: string | null
+          role: Database["public"]["Enums"]["group_role"]
+          status: Database["public"]["Enums"]["member_status"]
+          user_id: string
+        }
+        Insert: {
+          decided_at?: string | null
+          group_id: string
+          joined_at?: string | null
+          rejoin_after?: string | null
+          requested_at?: string | null
+          role?: Database["public"]["Enums"]["group_role"]
+          status: Database["public"]["Enums"]["member_status"]
+          user_id: string
+        }
+        Update: {
+          decided_at?: string | null
+          group_id?: string
+          joined_at?: string | null
+          rejoin_after?: string | null
+          requested_at?: string | null
+          role?: Database["public"]["Enums"]["group_role"]
+          status?: Database["public"]["Enums"]["member_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      groups: {
+        Row: {
+          access: Database["public"]["Enums"]["group_access"]
+          category_id: number
+          city_id: number
+          created_at: string
+          deleted_at: string | null
+          description: string
+          hidden_at: string | null
+          id: string
+          image_url: string | null
+          last_activity_at: string
+          max_members: number
+          member_count: number
+          name: string
+          owner_id: string
+          updated_at: string
+          zone: string | null
+        }
+        Insert: {
+          access: Database["public"]["Enums"]["group_access"]
+          category_id: number
+          city_id: number
+          created_at?: string
+          deleted_at?: string | null
+          description: string
+          hidden_at?: string | null
+          id?: string
+          image_url?: string | null
+          last_activity_at?: string
+          max_members: number
+          member_count?: number
+          name: string
+          owner_id: string
+          updated_at?: string
+          zone?: string | null
+        }
+        Update: {
+          access?: Database["public"]["Enums"]["group_access"]
+          category_id?: number
+          city_id?: number
+          created_at?: string
+          deleted_at?: string | null
+          description?: string
+          hidden_at?: string | null
+          id?: string
+          image_url?: string | null
+          last_activity_at?: string
+          max_members?: number
+          member_count?: number
+          name?: string
+          owner_id?: string
+          updated_at?: string
+          zone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "groups_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "interests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "groups_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "groups_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       interests: {
         Row: {
           created_at: string
@@ -213,11 +340,107 @@ export type Database = {
     }
     Functions: {
       age_from_birthdate: { Args: { birthdate: string }; Returns: number }
+      can_see_group: { Args: { p_group: string }; Returns: boolean }
+      cancel_request: { Args: { p_group: string }; Returns: undefined }
       complete_onboarding: { Args: never; Returns: undefined }
+      create_group: {
+        Args: {
+          p_access: Database["public"]["Enums"]["group_access"]
+          p_category_id: number
+          p_description: string
+          p_image_url?: string
+          p_max_members: number
+          p_name: string
+          p_zone?: string
+        }
+        Returns: string
+      }
+      decide_request: {
+        Args: { p_accept: boolean; p_group: string; p_user: string }
+        Returns: undefined
+      }
+      delete_group: {
+        Args: { p_confirm_name: string; p_group: string }
+        Returns: undefined
+      }
+      discover_groups: {
+        Args: {
+          p_category?: number
+          p_limit?: number
+          p_offset?: number
+          p_search?: string
+        }
+        Returns: {
+          access: Database["public"]["Enums"]["group_access"]
+          category_id: number
+          description: string
+          id: string
+          image_url: string
+          is_full: boolean
+          max_members: number
+          member_count: number
+          my_status: Database["public"]["Enums"]["member_status"]
+          name: string
+          zone: string
+        }[]
+      }
+      get_group: { Args: { p_group: string }; Returns: Json }
       get_profile: { Args: { p_id: string }; Returns: Json }
       is_active_profile: { Args: { p_id: string }; Returns: boolean }
       is_active_user: { Args: never; Returns: boolean }
       is_blocked: { Args: { a: string; b: string }; Returns: boolean }
+      is_group_member: {
+        Args: { p_group: string; p_user: string }
+        Returns: boolean
+      }
+      is_group_owner: {
+        Args: { p_group: string; p_user: string }
+        Returns: boolean
+      }
+      join_group: { Args: { p_group: string }; Returns: string }
+      leave_group: { Args: { p_group: string }; Returns: undefined }
+      list_group_members: {
+        Args: { p_group: string }
+        Returns: {
+          avatar_url: string
+          joined_at: string
+          name: string
+          role: Database["public"]["Enums"]["group_role"]
+          user_id: string
+        }[]
+      }
+      list_group_requests: {
+        Args: { p_group: string }
+        Returns: {
+          age: number
+          avatar_url: string
+          bio: string
+          name: string
+          requested_at: string
+          user_id: string
+        }[]
+      }
+      list_my_groups: {
+        Args: never
+        Returns: {
+          category_id: number
+          id: string
+          image_url: string
+          last_activity_at: string
+          max_members: number
+          member_count: number
+          my_role: Database["public"]["Enums"]["group_role"]
+          my_status: Database["public"]["Enums"]["member_status"]
+          name: string
+          pending_count: number
+        }[]
+      }
+      normalize_text: { Args: { t: string }; Returns: string }
+      owns_group_folder: { Args: { p_folder: string }; Returns: boolean }
+      remove_member: {
+        Args: { p_group: string; p_user: string }
+        Returns: undefined
+      }
       set_my_birthdate: { Args: { p_birthdate: string }; Returns: undefined }
       set_my_interests: {
         Args: { p_interest_ids: number[] }
@@ -225,9 +448,24 @@ export type Database = {
       }
       shares_context: { Args: { a: string; b: string }; Returns: boolean }
       today_ar: { Args: never; Returns: string }
+      update_group: {
+        Args: {
+          p_access: Database["public"]["Enums"]["group_access"]
+          p_category_id: number
+          p_description: string
+          p_group: string
+          p_image_url?: string
+          p_max_members: number
+          p_name: string
+          p_zone?: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
-      [_ in never]: never
+      group_access: "open" | "approval"
+      group_role: "owner" | "member"
+      member_status: "pending" | "active" | "rejected" | "banned"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -357,7 +595,11 @@ export const Constants = {
     Enums: {},
   },
   public: {
-    Enums: {},
+    Enums: {
+      group_access: ["open", "approval"],
+      group_role: ["owner", "member"],
+      member_status: ["pending", "active", "rejected", "banned"],
+    },
   },
 } as const
 

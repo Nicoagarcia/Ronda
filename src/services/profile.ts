@@ -1,6 +1,4 @@
-import { decode } from 'base64-arraybuffer';
-import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
-
+import { compressToJpeg, withCacheBuster } from '@/lib/images';
 import { supabase } from '@/lib/supabase';
 import type { Tables, TablesUpdate } from '@/types/database';
 
@@ -15,6 +13,7 @@ export type PublicProfile = {
   interests: { id: number; slug: string; name: string; emoji: string }[];
   extended: boolean;
   bio?: string | null;
+  groups?: { id: string; name: string; category_id: number; image_url: string | null; member_count: number; max_members: number }[];
 };
 
 export type ProfileEdit = Pick<TablesUpdate<'profiles'>, 'name' | 'city_id' | 'bio' | 'avatar_url'>;
@@ -59,22 +58,16 @@ export async function completeOnboarding() {
   if (error) throw error;
 }
 
-// Comprime la foto (1024 px, JPEG) y la sube a avatars/<user_id>/avatar.jpg.
+// Comprime la foto y la sube a avatars/<user_id>/avatar.jpg.
 export async function uploadAvatar(localUri: string): Promise<string> {
   const id = await currentUserId();
-  const rendered = await ImageManipulator.manipulate(localUri).resize({ width: 1024 }).renderAsync();
-  const saved = await rendered.saveAsync({ format: SaveFormat.JPEG, compress: 0.8, base64: true });
-  if (!saved.base64) throw new Error('No se pudo procesar la imagen');
-
   const path = `${id}/avatar.jpg`;
   const { error } = await supabase.storage
     .from('avatars')
-    .upload(path, decode(saved.base64), { contentType: 'image/jpeg', upsert: true });
+    .upload(path, await compressToJpeg(localUri), { contentType: 'image/jpeg', upsert: true });
   if (error) throw error;
 
-  // El parámetro evita que el celular muestre la foto vieja desde el caché.
-  const { data } = supabase.storage.from('avatars').getPublicUrl(path);
-  const url = `${data.publicUrl}?v=${Date.now()}`;
+  const url = withCacheBuster(supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl);
   await updateMyProfile({ avatar_url: url });
   return url;
 }

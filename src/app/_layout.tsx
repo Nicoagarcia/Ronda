@@ -38,6 +38,7 @@ function Gate() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="profile-edit" />
         <Stack.Screen name="settings" />
+        <Stack.Screen name="group" />
         <Stack.Screen name="user/[id]" />
       </Stack.Protected>
     </Stack>

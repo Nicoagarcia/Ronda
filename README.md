@@ -39,6 +39,11 @@ npm start                   # Metro; abrir desde la development build en el celu
 
 Los mails locales (códigos de registro y de contraseña) se ven en http://localhost:54324.
 
+`npm run db:reset` carga datos de prueba (`supabase/seed.sql`): 8 grupos en La Plata y 3 usuarios demo
+(`ana@demo.ronda`, `beto@demo.ronda`, `caro@demo.ronda`, contraseña `ronda1234`).
+
+| `npm run test:concurrency` | Prueba que dos personas no ocupen el último lugar de un grupo (spec 02, AC-12) |
+
 ## Development build
 
 El login con Google y otras librerías nativas no funcionan en Expo Go. Hace falta una app de desarrollo propia:

@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Header } from '@/components/ui/header';
 import { Screen } from '@/components/ui/screen';
+import { Text } from '@/components/ui/text';
+import { GroupCard } from '@/features/groups/components/group-card';
 import { ProfileCard } from '@/features/profile/components/profile-card';
 import { useProfile } from '@/features/profile/hooks';
 
@@ -37,6 +39,22 @@ export default function UserProfileScreen() {
         bio={profile.extended ? profile.bio : null}
         interests={profile.interests}
       />
+      {profile.extended && profile.groups?.length ? (
+        <View className="gap-2">
+          <Text variant="label">Grupos</Text>
+          {profile.groups.map((g) => (
+            <GroupCard
+              key={g.id}
+              id={g.id}
+              name={g.name}
+              imageUrl={g.image_url}
+              categoryId={g.category_id}
+              memberCount={g.member_count}
+              maxMembers={g.max_members}
+            />
+          ))}
+        </View>
+      ) : null}
       <View className="flex-row gap-3">
         <Button title="Reportar" variant="ghost" className="flex-1" onPress={soon} />
         <Button title="Bloquear" variant="ghost" className="flex-1" onPress={soon} />

@@ -41,7 +41,8 @@
     "@types/react": "~19.2.2",
     "eslint": "^9.39.5",
     "eslint-config-expo": "~57.0.2",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "ws": "^8.22.0"
   },
   "scripts": {
     "start": "expo start",
@@ -55,7 +56,8 @@
     "postinstall": "uniwind generate-artifacts --css ./src/global.css --dts ./src/uniwind-types.d.ts",
     "test": "jest",
     "functions:serve": "supabase functions serve",
-    "start:go": "expo start --go"
+    "start:go": "expo start --go",
+    "test:concurrency": "node scripts/concurrency/join-last-spot.mjs"
   },
   "private": true,
   "jest": {

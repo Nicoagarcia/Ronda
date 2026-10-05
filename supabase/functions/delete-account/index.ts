@@ -1,8 +1,8 @@
 // Elimina la cuenta del usuario que llama (spec 01, "Cerrar sesión y eliminar cuenta").
 //
-// Borra la foto y el usuario de Auth. Lo demás cae en cascada desde auth.users:
-// perfil, intereses y bloqueos. Los hitos siguientes suman acá la limpieza de
-// grupos, planes y mensajes.
+// Primero cancela sus planes y elimina sus grupos con aviso a los demás
+// (prepare_account_deletion). Después borra la foto y el usuario de Auth; el resto cae
+// en cascada. Sus mensajes quedan sin autor ("Usuario eliminado").
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "@supabase/supabase-js";
 
@@ -33,6 +33,12 @@ Deno.serve(async (req) => {
   const token = req.headers.get("Authorization")?.replace("Bearer ", "") ?? "";
   const { data: { user }, error: userError } = await admin.auth.getUser(token);
   if (userError || !user) return json(401, { error: "Sesión inválida" });
+
+  const { error: prepareError } = await admin.rpc("prepare_account_deletion", { p_user: user.id });
+  if (prepareError) {
+    console.error("delete-account", user.id, prepareError);
+    return json(500, { error: "No pudimos eliminar la cuenta. Probá de nuevo." });
+  }
 
   const { data: files } = await admin.storage.from("avatars").list(user.id);
   if (files?.length) {

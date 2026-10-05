@@ -134,3 +134,8 @@ from (values
 ) as x (group_name, plan_title, sender, body, minutes_ago)
 left join public.groups g on g.name = x.group_name
 left join public.plans p on p.title = x.plan_title;
+
+-- Configuración del despacho de notificaciones en local (ver migración de notificaciones).
+-- La base llega a la Edge Function por la red interna de Docker.
+select vault.create_secret('http://supabase_kong_ronda:8000', 'project_url');
+select vault.create_secret('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU', 'service_role_key');

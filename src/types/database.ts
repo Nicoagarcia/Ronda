@@ -369,6 +369,106 @@ export type Database = {
           },
         ]
       }
+      notification_outbox: {
+        Row: {
+          attempts: number
+          body: string
+          channel: string
+          claimed_at: string | null
+          collapse_key: string | null
+          created_at: string
+          error: string | null
+          id: number
+          path: string
+          payload: Json
+          send_after: string
+          sent_at: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          body: string
+          channel: string
+          claimed_at?: string | null
+          collapse_key?: string | null
+          created_at?: string
+          error?: string | null
+          id?: never
+          path: string
+          payload?: Json
+          send_after?: string
+          sent_at?: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          body?: string
+          channel?: string
+          claimed_at?: string | null
+          collapse_key?: string | null
+          created_at?: string
+          error?: string | null
+          id?: never
+          path?: string
+          payload?: Json
+          send_after?: string
+          sent_at?: string | null
+          title?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_outbox_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_settings: {
+        Row: {
+          group_plans: boolean
+          messages: boolean
+          permission_prompted_at: string | null
+          plan_joins: boolean
+          plan_updates: boolean
+          requests: boolean
+          user_id: string
+        }
+        Insert: {
+          group_plans?: boolean
+          messages?: boolean
+          permission_prompted_at?: string | null
+          plan_joins?: boolean
+          plan_updates?: boolean
+          requests?: boolean
+          user_id: string
+        }
+        Update: {
+          group_plans?: boolean
+          messages?: boolean
+          permission_prompted_at?: string | null
+          plan_joins?: boolean
+          plan_updates?: boolean
+          requests?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_settings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plan_participants: {
         Row: {
           joined_at: string
@@ -626,6 +726,38 @@ export type Database = {
           },
         ]
       }
+      push_tokens: {
+        Row: {
+          device_id: string | null
+          platform: string
+          token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          device_id?: string | null
+          platform: string
+          token: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          device_id?: string | null
+          platform?: string
+          token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_tokens_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       plans_with_status: {
@@ -753,9 +885,29 @@ export type Database = {
         Returns: undefined
       }
       cancel_request: { Args: { p_group: string }; Returns: undefined }
+      channel_for: {
+        Args: { p_type: Database["public"]["Enums"]["notification_type"] }
+        Returns: string
+      }
       chat_closed_reason: {
         Args: { p_group: string; p_plan: string }
         Returns: string
+      }
+      claim_notifications: {
+        Args: { p_limit?: number }
+        Returns: {
+          body: string
+          channel: string
+          id: number
+          path: string
+          title: string
+          tokens: string[]
+          user_id: string
+        }[]
+      }
+      complete_notifications: {
+        Args: { p_failed?: Json; p_invalid_tokens?: string[]; p_sent: number[] }
+        Returns: undefined
       }
       complete_onboarding: { Args: never; Returns: undefined }
       create_group: {
@@ -841,10 +993,27 @@ export type Database = {
           zone: string
         }[]
       }
+      dispatch_notifications: { Args: never; Returns: undefined }
+      enqueue_message_digests: { Args: never; Returns: number }
+      enqueue_notification: {
+        Args: {
+          p_actor?: string
+          p_body: string
+          p_collapse_key?: string
+          p_path: string
+          p_send_after?: string
+          p_title: string
+          p_type: Database["public"]["Enums"]["notification_type"]
+          p_user: string
+        }
+        Returns: undefined
+      }
+      enqueue_plan_reminders: { Args: never; Returns: number }
       format_ar: { Args: { p_ts: string }; Returns: string }
       get_chat: { Args: { p_group?: string; p_plan?: string }; Returns: Json }
       get_group: { Args: { p_group: string }; Returns: Json }
       get_message: { Args: { p_message: string }; Returns: Json }
+      get_notification_settings: { Args: never; Returns: Json }
       get_plan: { Args: { p_plan: string }; Returns: Json }
       get_profile: { Args: { p_id: string }; Returns: Json }
       is_active_profile: { Args: { p_id: string }; Returns: boolean }
@@ -958,6 +1127,7 @@ export type Database = {
           zone: string
         }[]
       }
+      mark_permission_prompted: { Args: never; Returns: undefined }
       mark_read: {
         Args: { p_group?: string; p_plan?: string }
         Returns: undefined
@@ -967,11 +1137,13 @@ export type Database = {
         Returns: Json
       }
       normalize_text: { Args: { t: string }; Returns: string }
+      notifications_tick: { Args: never; Returns: undefined }
       owns_group_folder: { Args: { p_folder: string }; Returns: boolean }
       plan_effective_end: {
         Args: { p_ends_at: string; p_starts_at: string }
         Returns: string
       }
+      plan_label: { Args: { p_plan: string }; Returns: string }
       plan_preview: { Args: { p_limit: number; p_plan: string }; Returns: Json }
       plan_status: {
         Args: { p_cancelled_at: string; p_ends_at: string; p_starts_at: string }
@@ -984,6 +1156,11 @@ export type Database = {
           p_plan: string
           p_subject: string
         }
+        Returns: undefined
+      }
+      prepare_account_deletion: { Args: { p_user: string }; Returns: undefined }
+      register_push_token: {
+        Args: { p_device_id?: string; p_platform: string; p_token: string }
         Returns: undefined
       }
       remove_member: {
@@ -1009,6 +1186,7 @@ export type Database = {
       }
       shares_context: { Args: { a: string; b: string }; Returns: boolean }
       today_ar: { Args: never; Returns: string }
+      unregister_push_token: { Args: { p_token: string }; Returns: undefined }
       update_group: {
         Args: {
           p_access: Database["public"]["Enums"]["group_access"]
@@ -1020,6 +1198,10 @@ export type Database = {
           p_name: string
           p_zone?: string
         }
+        Returns: undefined
+      }
+      update_notification_settings: {
+        Args: { p_settings: Json }
         Returns: undefined
       }
       update_plan: {
@@ -1049,6 +1231,13 @@ export type Database = {
         }
         Returns: undefined
       }
+      wants_notification: {
+        Args: {
+          p_type: Database["public"]["Enums"]["notification_type"]
+          p_user: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       group_access: "open" | "approval"
@@ -1056,6 +1245,17 @@ export type Database = {
       member_status: "pending" | "active" | "rejected" | "banned"
       message_deleted_by: "author" | "moderator"
       message_kind: "text" | "system"
+      notification_type:
+        | "message"
+        | "message_digest"
+        | "join_request"
+        | "request_accepted"
+        | "group_plan"
+        | "plan_join"
+        | "plan_reminder"
+        | "plan_changed"
+        | "plan_cancelled"
+        | "group_deleted"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1191,6 +1391,18 @@ export const Constants = {
       member_status: ["pending", "active", "rejected", "banned"],
       message_deleted_by: ["author", "moderator"],
       message_kind: ["text", "system"],
+      notification_type: [
+        "message",
+        "message_digest",
+        "join_request",
+        "request_accepted",
+        "group_plan",
+        "plan_join",
+        "plan_reminder",
+        "plan_changed",
+        "plan_cancelled",
+        "group_deleted",
+      ],
     },
   },
 } as const

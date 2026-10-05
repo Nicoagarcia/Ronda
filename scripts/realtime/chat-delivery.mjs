@@ -85,8 +85,16 @@ try {
   const readerSub = listen(reader.client, groupId);
   const outsiderSub = listen(outsider.client, groupId);
   await Promise.all([readerSub.ready, outsiderSub.ready]);
-  // Después de SUBSCRIBED, Realtime tarda un momento en registrar la suscripción en la base.
-  await sleep(2000);
+  // Después de SUBSCRIBED (y tras un db:reset), Realtime tarda en quedar listo.
+  // Se calienta mandando mensajes hasta que llegue uno; recién ahí se mide.
+  const warmupUntil = Date.now() + 20_000;
+  while (Date.now() < warmupUntil) {
+    const { data: warm } = await owner.client.rpc('send_message', { p_body: 'calentando', p_group: groupId });
+    await sleep(1000);
+    if (readerSub.received.some((r) => r.id === warm.id)) break;
+  }
+  readerSub.received.length = 0;
+  outsiderSub.received.length = 0;
 
   const sentAt = Date.now();
   const { data: msg } = await owner.client.rpc('send_message', { p_body: 'Hola en vivo', p_group: groupId });

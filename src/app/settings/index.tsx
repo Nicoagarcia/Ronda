@@ -30,7 +30,7 @@ export default function SettingsScreen() {
     <Screen scroll>
       <Header title="Ajustes" />
       <View>
-        <Row label="Notificaciones" detail="Hito 5" />
+        <Row label="Notificaciones" onPress={() => router.push('/settings/notifications')} />
         <Row label="Bloqueados" detail="Hito 6" />
         <Row label="Normas de la comunidad" detail="Hito 7" />
         {/* AC-19: el borrado del token de push al cerrar sesión se suma en el Hito 5. */}

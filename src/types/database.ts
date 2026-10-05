@@ -34,6 +34,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      admins: {
+        Row: {
+          user_id: string
+        }
+        Insert: {
+          user_id: string
+        }
+        Update: {
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admins_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      banned_emails: {
+        Row: {
+          created_at: string
+          email_hash: string
+        }
+        Insert: {
+          created_at?: string
+          email_hash: string
+        }
+        Update: {
+          created_at?: string
+          email_hash?: string
+        }
+        Relationships: []
+      }
       blocks: {
         Row: {
           blocked_id: string
@@ -365,6 +400,54 @@ export type Database = {
             columns: ["sender_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      moderation_alerts: {
+        Row: {
+          attempts: number
+          claimed_at: string | null
+          created_at: string
+          error: string | null
+          id: number
+          report_id: string | null
+          sent_at: string | null
+          text: string
+        }
+        Insert: {
+          attempts?: number
+          claimed_at?: string | null
+          created_at?: string
+          error?: string | null
+          id?: never
+          report_id?: string | null
+          sent_at?: string | null
+          text: string
+        }
+        Update: {
+          attempts?: number
+          claimed_at?: string | null
+          created_at?: string
+          error?: string | null
+          id?: never
+          report_id?: string | null
+          sent_at?: string | null
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "moderation_alerts_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "moderation_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "moderation_alerts_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
             referencedColumns: ["id"]
           },
         ]
@@ -758,8 +841,132 @@ export type Database = {
           },
         ]
       }
+      reports: {
+        Row: {
+          created_at: string
+          details: string | null
+          id: string
+          priority: Database["public"]["Enums"]["report_priority"]
+          reason: Database["public"]["Enums"]["report_reason"]
+          reporter_id: string | null
+          resolution: string | null
+          resolution_note: string | null
+          resolved_at: string | null
+          snapshot: Json
+          status: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_type: Database["public"]["Enums"]["report_target"]
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          priority: Database["public"]["Enums"]["report_priority"]
+          reason: Database["public"]["Enums"]["report_reason"]
+          reporter_id?: string | null
+          resolution?: string | null
+          resolution_note?: string | null
+          resolved_at?: string | null
+          snapshot: Json
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_type: Database["public"]["Enums"]["report_target"]
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          priority?: Database["public"]["Enums"]["report_priority"]
+          reason?: Database["public"]["Enums"]["report_reason"]
+          reporter_id?: string | null
+          resolution?: string | null
+          resolution_note?: string | null
+          resolved_at?: string | null
+          snapshot?: Json
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id?: string
+          target_type?: Database["public"]["Enums"]["report_target"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_warnings: {
+        Row: {
+          created_at: string
+          id: string
+          reason: string
+          seen_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reason: string
+          seen_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reason?: string
+          seen_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_warnings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
+      moderation_queue: {
+        Row: {
+          created_at: string | null
+          details: string | null
+          id: string | null
+          priority: Database["public"]["Enums"]["report_priority"] | null
+          reason: Database["public"]["Enums"]["report_reason"] | null
+          reporters: number | null
+          snapshot: Json | null
+          target_id: string | null
+          target_type: Database["public"]["Enums"]["report_target"] | null
+        }
+        Insert: {
+          created_at?: string | null
+          details?: string | null
+          id?: string | null
+          priority?: Database["public"]["Enums"]["report_priority"] | null
+          reason?: Database["public"]["Enums"]["report_reason"] | null
+          reporters?: never
+          snapshot?: Json | null
+          target_id?: string | null
+          target_type?: Database["public"]["Enums"]["report_target"] | null
+        }
+        Update: {
+          created_at?: string | null
+          details?: string | null
+          id?: string | null
+          priority?: Database["public"]["Enums"]["report_priority"] | null
+          reason?: Database["public"]["Enums"]["report_reason"] | null
+          reporters?: never
+          snapshot?: Json | null
+          target_id?: string | null
+          target_type?: Database["public"]["Enums"]["report_target"] | null
+        }
+        Relationships: []
+      }
       plans_with_status: {
         Row: {
           cancel_reason: string | null
@@ -861,11 +1068,38 @@ export type Database = {
     }
     Functions: {
       accept_safety_notice: { Args: never; Returns: undefined }
+      ack_warning: { Args: { p_warning: string }; Returns: undefined }
+      admin_cancel_plan: {
+        Args: { p_note?: string; p_plan: string }
+        Returns: undefined
+      }
+      admin_delete_group: {
+        Args: { p_group: string; p_note?: string }
+        Returns: undefined
+      }
+      admin_delete_message: {
+        Args: { p_message: string; p_note?: string }
+        Returns: undefined
+      }
+      admin_dismiss: {
+        Args: { p_note?: string; p_report: string }
+        Returns: undefined
+      }
+      admin_suspend: {
+        Args: { p_days: number; p_reason: string; p_user: string }
+        Returns: undefined
+      }
+      admin_warn: {
+        Args: { p_reason: string; p_user: string }
+        Returns: undefined
+      }
       age_from_birthdate: { Args: { birthdate: string }; Returns: number }
       apply_group_exit_to_plans: {
         Args: { p_group: string; p_user: string }
         Returns: undefined
       }
+      assert_moderator: { Args: never; Returns: undefined }
+      block_user: { Args: { p_user: string }; Returns: undefined }
       can_read_chat: {
         Args: { p_group: string; p_plan: string; p_user: string }
         Returns: boolean
@@ -893,6 +1127,13 @@ export type Database = {
         Args: { p_group: string; p_plan: string }
         Returns: string
       }
+      claim_moderation_alerts: {
+        Args: { p_limit?: number }
+        Returns: {
+          id: number
+          text: string
+        }[]
+      }
       claim_notifications: {
         Args: { p_limit?: number }
         Returns: {
@@ -904,6 +1145,10 @@ export type Database = {
           tokens: string[]
           user_id: string
         }[]
+      }
+      complete_moderation_alerts: {
+        Args: { p_failed?: Json; p_sent: number[] }
+        Returns: undefined
       }
       complete_notifications: {
         Args: { p_failed?: Json; p_invalid_tokens?: string[]; p_sent: number[] }
@@ -937,6 +1182,15 @@ export type Database = {
           p_zone?: string
         }
         Returns: string
+      }
+      create_report: {
+        Args: {
+          p_details?: string
+          p_reason: Database["public"]["Enums"]["report_reason"]
+          p_target_id: string
+          p_target_type: Database["public"]["Enums"]["report_target"]
+        }
+        Returns: undefined
       }
       decide_request: {
         Args: { p_accept: boolean; p_group: string; p_user: string }
@@ -1013,11 +1267,13 @@ export type Database = {
       get_chat: { Args: { p_group?: string; p_plan?: string }; Returns: Json }
       get_group: { Args: { p_group: string }; Returns: Json }
       get_message: { Args: { p_message: string }; Returns: Json }
+      get_my_warning: { Args: never; Returns: Json }
       get_notification_settings: { Args: never; Returns: Json }
       get_plan: { Args: { p_plan: string }; Returns: Json }
       get_profile: { Args: { p_id: string }; Returns: Json }
       is_active_profile: { Args: { p_id: string }; Returns: boolean }
       is_active_user: { Args: never; Returns: boolean }
+      is_admin: { Args: never; Returns: boolean }
       is_blocked: { Args: { a: string; b: string }; Returns: boolean }
       is_group_member: {
         Args: { p_group: string; p_user: string }
@@ -1080,6 +1336,15 @@ export type Database = {
         }
         Returns: Json[]
       }
+      list_my_blocks: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          blocked_at: string
+          name: string
+          user_id: string
+        }[]
+      }
       list_my_chats: {
         Args: never
         Returns: {
@@ -1136,6 +1401,14 @@ export type Database = {
         Args: { m: Database["public"]["Tables"]["messages"]["Row"] }
         Returns: Json
       }
+      my_spaces_with: {
+        Args: { p_user: string }
+        Returns: {
+          id: string
+          kind: string
+          name: string
+        }[]
+      }
       normalize_text: { Args: { t: string }; Returns: string }
       notifications_tick: { Args: never; Returns: undefined }
       owns_group_folder: { Args: { p_folder: string }; Returns: boolean }
@@ -1171,6 +1444,31 @@ export type Database = {
         Args: { p_plan: string; p_user: string }
         Returns: undefined
       }
+      report_priority_for: {
+        Args: { p_reason: Database["public"]["Enums"]["report_reason"] }
+        Returns: Database["public"]["Enums"]["report_priority"]
+      }
+      report_reason_label: {
+        Args: { p_reason: Database["public"]["Enums"]["report_reason"] }
+        Returns: string
+      }
+      report_snapshot: {
+        Args: {
+          p_id: string
+          p_type: Database["public"]["Enums"]["report_target"]
+        }
+        Returns: Json
+      }
+      resolve_reports: {
+        Args: {
+          p_id: string
+          p_note: string
+          p_resolution: string
+          p_status: Database["public"]["Enums"]["report_status"]
+          p_type: Database["public"]["Enums"]["report_target"]
+        }
+        Returns: undefined
+      }
       send_message: {
         Args: { p_body: string; p_group?: string; p_plan?: string }
         Returns: Json
@@ -1186,6 +1484,7 @@ export type Database = {
       }
       shares_context: { Args: { a: string; b: string }; Returns: boolean }
       today_ar: { Args: never; Returns: string }
+      unblock_user: { Args: { p_user: string }; Returns: undefined }
       unregister_push_token: { Args: { p_token: string }; Returns: undefined }
       update_group: {
         Args: {
@@ -1256,6 +1555,17 @@ export type Database = {
         | "plan_changed"
         | "plan_cancelled"
         | "group_deleted"
+      report_priority: "urgent" | "high" | "normal"
+      report_reason:
+        | "danger"
+        | "harassment"
+        | "underage"
+        | "sexual_violent"
+        | "impersonation"
+        | "spam"
+        | "other"
+      report_status: "open" | "dismissed" | "actioned"
+      report_target: "user" | "group" | "plan" | "message"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1403,6 +1713,18 @@ export const Constants = {
         "plan_cancelled",
         "group_deleted",
       ],
+      report_priority: ["urgent", "high", "normal"],
+      report_reason: [
+        "danger",
+        "harassment",
+        "underage",
+        "sexual_violent",
+        "impersonation",
+        "spam",
+        "other",
+      ],
+      report_status: ["open", "dismissed", "actioned"],
+      report_target: ["user", "group", "plan", "message"],
     },
   },
 } as const

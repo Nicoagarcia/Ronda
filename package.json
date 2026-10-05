@@ -60,7 +60,8 @@
     "functions:serve": "supabase functions serve",
     "start:go": "expo start --go",
     "test:concurrency": "node scripts/concurrency/last-spot.mjs",
-    "test:realtime": "node scripts/realtime/chat-delivery.mjs"
+    "test:realtime": "node scripts/realtime/chat-delivery.mjs",
+    "test:moderation": "node scripts/moderation/admin-only.mjs"
   },
   "private": true,
   "jest": {

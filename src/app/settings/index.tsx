@@ -31,8 +31,8 @@ export default function SettingsScreen() {
       <Header title="Ajustes" />
       <View>
         <Row label="Notificaciones" onPress={() => router.push('/settings/notifications')} />
-        <Row label="Bloqueados" detail="Hito 6" />
-        <Row label="Normas de la comunidad" detail="Hito 7" />
+        <Row label="Bloqueados" onPress={() => router.push('/settings/blocked')} />
+        <Row label="Normas de la comunidad" onPress={() => router.push('/settings/rules')} />
         {/* AC-19: el borrado del token de push al cerrar sesión se suma en el Hito 5. */}
         <Row label="Cerrar sesión" onPress={() => signOut()} />
         <Row label="Eliminar cuenta" danger onPress={() => router.push('/settings/delete-account')} />

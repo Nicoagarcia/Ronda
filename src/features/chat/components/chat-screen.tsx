@@ -20,6 +20,7 @@ import {
   useSetMuted,
 } from '@/features/chat/hooks';
 import { useAuth } from '@/features/auth/auth-provider';
+import { useBlockFlow } from '@/features/moderation/hooks';
 import { arDayKey, dayLabel } from '@/lib/dates';
 import { errorMessage } from '@/lib/errors';
 import type { ChatMessage, ChatRef } from '@/services/chat';
@@ -36,6 +37,7 @@ export function ChatScreen({ chat }: { chat: ChatRef }) {
   const discard = useDiscardLocal(chat);
   const markRead = useMarkRead(chat);
   const mute = useSetMuted(chat);
+  const block = useBlockFlow();
   const [text, setText] = useState('');
   const [selected, setSelected] = useState<ChatMessage | null>(null);
 
@@ -90,8 +92,16 @@ export function ChatScreen({ chat }: { chat: ChatRef }) {
         onPress: () => remove.mutate(m.id, { onError: (e) => Alert.alert('No se pudo', errorMessage(e)) }),
       });
     }
-    if (m.sender_id !== me && !m.local) {
-      list.push({ label: 'Reportar', onPress: () => Alert.alert('Próximamente', 'Reportar llega en el Hito 6.') });
+    if (m.sender_id && m.sender_id !== me && !m.local) {
+      const senderId = m.sender_id;
+      const senderName = m.sender_name ?? 'esta persona';
+      if (!isDeleted) {
+        list.push({
+          label: 'Reportar mensaje',
+          onPress: () => router.push({ pathname: '/report', params: { type: 'message', id: m.id, userId: senderId, name: senderName } }),
+        });
+      }
+      list.push({ label: `Bloquear a ${senderName}`, danger: true, onPress: () => block(senderId, senderName) });
     }
     return list;
   };

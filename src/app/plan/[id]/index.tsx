@@ -12,6 +12,7 @@ import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
 import { useAuth } from '@/features/auth/auth-provider';
 import { coverColor, useCategory } from '@/features/groups/categories';
+import { usePersonActions } from '@/features/moderation/person-actions';
 import { SafetyNotice } from '@/features/plans/components/safety-notice';
 import { useJoinPlan, useLeavePlan, usePlan, useRemoveParticipant } from '@/features/plans/hooks';
 import { formatPlanWhen, formatTime } from '@/lib/dates';
@@ -110,8 +111,12 @@ function PlanContent({ plan }: { plan: PlanDetail }) {
           <Row icon="close-circle-outline" label="Cancelar plan" danger onPress={() => router.push(`/plan/${plan.id}/cancel`)} />
         </View>
       ) : null}
-      {!plan.is_creator && plan.am_participant ? (
-        <Row icon="flag-outline" label="Reportar plan" onPress={() => Alert.alert('Próximamente', 'Reportar llega en el Hito 6.')} />
+      {!plan.is_creator ? (
+        <Row
+          icon="flag-outline"
+          label="Reportar plan"
+          onPress={() => router.push({ pathname: '/report', params: { type: 'plan', id: plan.id } })}
+        />
       ) : null}
     </Screen>
   );
@@ -187,6 +192,10 @@ function Participants({ plan }: { plan: PlanDetail }) {
       { text: 'Sacar', style: 'destructive', onPress: () => remove.mutate(userId, { onError: (e) => Alert.alert('No se pudo', errorMessage(e)) }) },
     ]);
 
+  const personActions = usePersonActions((p) =>
+    canRemove && p.id !== plan.creator_id ? [{ label: 'Sacar del plan', danger: true, onPress: () => confirmRemove(p.id, p.name) }] : [],
+  );
+
   return (
     <View className="gap-2">
       <Text variant="label">
@@ -197,6 +206,7 @@ function Participants({ plan }: { plan: PlanDetail }) {
           key={p.id}
           accessibilityRole="button"
           onPress={() => p.id !== session?.user.id && router.push(`/user/${p.id}`)}
+          onLongPress={() => p.id !== session?.user.id && personActions.open({ id: p.id, name: p.name })}
           className="flex-row items-center gap-3 py-1">
           <Avatar uri={p.avatar_url} name={p.name} size={40} />
           <Text className="flex-1">
@@ -210,6 +220,7 @@ function Participants({ plan }: { plan: PlanDetail }) {
           ) : null}
         </Pressable>
       ))}
+      {personActions.sheet}
     </View>
   );
 }

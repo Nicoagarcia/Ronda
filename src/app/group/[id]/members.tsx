@@ -7,6 +7,7 @@ import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
 import { useAuth } from '@/features/auth/auth-provider';
 import { useGroup, useGroupMembers, useRemoveMember } from '@/features/groups/hooks';
+import { usePersonActions } from '@/features/moderation/person-actions';
 import { errorMessage } from '@/lib/errors';
 
 export default function GroupMembersScreen() {
@@ -17,6 +18,7 @@ export default function GroupMembersScreen() {
   const remove = useRemoveMember(id);
 
   const isOwner = !!group && !('banned' in group) && group.my_role === 'owner';
+  const ownerId = group && !('banned' in group) ? group.owner_id : null;
 
   const confirmRemove = (userId: string, name: string) =>
     Alert.alert(`¿Expulsar a ${name}?`, 'No va a poder volver a unirse ni pedir ingreso a este grupo.', [
@@ -27,6 +29,10 @@ export default function GroupMembersScreen() {
         onPress: () => remove.mutate(userId, { onError: (e) => Alert.alert('No se pudo', errorMessage(e)) }),
       },
     ]);
+
+  const personActions = usePersonActions((p) =>
+    isOwner && p.id !== ownerId ? [{ label: 'Expulsar del grupo', danger: true, onPress: () => confirmRemove(p.id, p.name) }] : [],
+  );
 
   return (
     <Screen>
@@ -39,6 +45,7 @@ export default function GroupMembersScreen() {
           <Pressable
             accessibilityRole="button"
             onPress={() => item.user_id !== session?.user.id && router.push(`/user/${item.user_id}`)}
+            onLongPress={() => item.user_id !== session?.user.id && personActions.open({ id: item.user_id, name: item.name })}
             className="flex-row items-center gap-3 py-3">
             <Avatar uri={item.avatar_url} name={item.name} size={44} />
             <View className="flex-1">
@@ -53,6 +60,7 @@ export default function GroupMembersScreen() {
           </Pressable>
         )}
       />
+      {personActions.sheet}
     </Screen>
   );
 }

@@ -45,3 +45,6 @@ example
 # Supabase local
 supabase/.temp/
 supabase/.branches/
+
+# Secretos de Edge Functions
+supabase/functions/.env

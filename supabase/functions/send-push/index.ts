@@ -1,4 +1,5 @@
 // Toma notificaciones de la cola (notification_outbox) y las manda por Expo Push.
+// También manda las alertas de moderación por Telegram (spec 06).
 // La llaman la base (al encolar algo inmediato) y pg_cron cada minuto (spec 05).
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "@supabase/supabase-js";
@@ -32,6 +33,36 @@ async function sendToExpo(messages: ExpoMessage[]): Promise<ExpoTicket[]> {
   if (!res.ok) throw new Error(`Expo respondió ${res.status}: ${await res.text()}`);
   const { data } = await res.json();
   return data as ExpoTicket[];
+}
+
+// Alertas al moderador (spec 06, AC-19). Sin TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID quedan en la cola.
+// deno-lint-ignore no-explicit-any
+async function sendModerationAlerts(admin: any) {
+  const botToken = Deno.env.get("TELEGRAM_BOT_TOKEN");
+  const chatId = Deno.env.get("TELEGRAM_CHAT_ID");
+  if (!botToken || !chatId) return { alerts: 0, alerts_pending: "Telegram sin configurar" };
+
+  const { data, error } = await admin.rpc("claim_moderation_alerts", { p_limit: 50 });
+  if (error) throw error;
+  const alerts = (data ?? []) as { id: number; text: string }[];
+
+  const sent: number[] = [];
+  const failed: { id: number; error: string }[] = [];
+  for (const alert of alerts) {
+    try {
+      const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: chatId, text: alert.text }),
+      });
+      if (res.ok) sent.push(alert.id);
+      else failed.push({ id: alert.id, error: `Telegram ${res.status}: ${await res.text()}` });
+    } catch (e) {
+      failed.push({ id: alert.id, error: e instanceof Error ? e.message : String(e) });
+    }
+  }
+  await admin.rpc("complete_moderation_alerts", { p_sent: sent, p_failed: failed });
+  return { alerts: sent.length };
 }
 
 Deno.serve(async (req) => {
@@ -100,5 +131,13 @@ Deno.serve(async (req) => {
   });
   if (completeError) return json(500, { error: completeError.message });
 
-  return json(200, { claimed: claimed.length, sent: sent.length, failed: failed.length, invalid_tokens: invalidTokens.size });
+  const moderation = await sendModerationAlerts(admin).catch((e) => ({ alerts_error: String(e) }));
+
+  return json(200, {
+    claimed: claimed.length,
+    sent: sent.length,
+    failed: failed.length,
+    invalid_tokens: invalidTokens.size,
+    ...moderation,
+  });
 });

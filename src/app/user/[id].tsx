@@ -1,5 +1,5 @@
-import { useLocalSearchParams } from 'expo-router';
-import { Alert, View } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
+import { View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -7,6 +7,7 @@ import { Header } from '@/components/ui/header';
 import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
 import { GroupCard } from '@/features/groups/components/group-card';
+import { useBlockFlow } from '@/features/moderation/hooks';
 import { PlanCard } from '@/features/plans/components/plan-card';
 import { ProfileCard } from '@/features/profile/components/profile-card';
 import { useProfile } from '@/features/profile/hooks';
@@ -15,6 +16,7 @@ import { useProfile } from '@/features/profile/hooks';
 export default function UserProfileScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: profile, isPending } = useProfile(id);
+  const block = useBlockFlow();
 
   if (isPending) return null;
 
@@ -26,8 +28,6 @@ export default function UserProfileScreen() {
       </Screen>
     );
   }
-
-  const soon = () => Alert.alert('Próximamente', 'Reportar y bloquear llegan en el Hito 6.');
 
   return (
     <Screen scroll>
@@ -76,8 +76,13 @@ export default function UserProfileScreen() {
         </View>
       ) : null}
       <View className="flex-row gap-3">
-        <Button title="Reportar" variant="ghost" className="flex-1" onPress={soon} />
-        <Button title="Bloquear" variant="ghost" className="flex-1" onPress={soon} />
+        <Button
+          title="Reportar"
+          variant="ghost"
+          className="flex-1"
+          onPress={() => router.push({ pathname: '/report', params: { type: 'user', id, userId: id, name: profile.name } })}
+        />
+        <Button title="Bloquear" variant="ghost" className="flex-1" onPress={() => block(id, profile.name, () => router.back())} />
       </View>
     </Screen>
   );

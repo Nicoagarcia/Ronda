@@ -43,6 +43,7 @@ Los mails locales (códigos de registro y de contraseña) se ven en http://local
 (`ana@demo.ronda`, `beto@demo.ronda`, `caro@demo.ronda`, contraseña `ronda1234`).
 
 | `npm run test:realtime` | Prueba que el chat en vivo llegue a quien corresponde y a nadie más (spec 04). |
+| `npm run test:moderation` | Prueba por API que solo un admin pueda moderar (spec 06, AC-21) |
 | `npm run test:concurrency` | Prueba que dos personas no ocupen el último lugar de un grupo o plan (spec 02 AC-12, spec 03 AC-14) |
 
 ## Development build
@@ -68,3 +69,13 @@ Al terminar, EAS da un link o QR para instalar el APK en el celular. Se rehace s
 - **Notificaciones**: la cola (`notification_outbox`) se despacha sola (pg_cron cada minuto y al encolar). Para ver qué se mandó:
   `psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -c "select type, title, body, error from notification_outbox order by id desc limit 20"`.
   Expo Go no recibe push en Android: para verlas en el celular hace falta la development build.
+
+## Moderación (beta)
+
+- **Alertas por Telegram**: crear un bot con @BotFather, mandarle un mensaje y obtener el `chat_id`
+  (`https://api.telegram.org/bot<TOKEN>/getUpdates`). Cargar `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID`
+  en `supabase/functions/.env` (local) o con `supabase secrets set` (producción). Sin eso, las alertas quedan en la cola.
+- **Revisar reportes**: en el editor SQL del dashboard, `select * from moderation_queue;` (lo urgente primero).
+- **Acciones** (desde el editor SQL): `admin_dismiss(report_id, nota)`, `admin_delete_message(message_id, nota)`,
+  `admin_delete_group(group_id, nota)`, `admin_cancel_plan(plan_id, nota)`, `admin_warn(user_id, motivo)`,
+  `admin_suspend(user_id, 1 | 7 | 30 | null, motivo)` (`null` = permanente: borra la cuenta y bloquea el email).

@@ -89,6 +89,13 @@ function GroupContent({ group }: { group: GroupDetail }) {
       <GroupPlans group={group} />
 
       {isOwner ? <OwnerActions group={group} /> : isMember ? <MemberActions group={group} /> : null}
+      {!isOwner ? (
+        <Row
+          icon="flag-outline"
+          label="Reportar grupo"
+          onPress={() => router.push({ pathname: '/report', params: { type: 'group', id: group.id } })}
+        />
+      ) : null}
     </Screen>
   );
 }
@@ -166,7 +173,6 @@ function MemberActions({ group }: { group: GroupDetail }) {
   return (
     <View>
       <Row icon="exit-outline" label="Salir del grupo" danger onPress={confirmLeave} />
-      <Row icon="flag-outline" label="Reportar grupo" onPress={() => Alert.alert('Próximamente', 'Reportar llega en el Hito 6.')} />
       <ErrorText>{leave.error ? errorMessage(leave.error) : null}</ErrorText>
     </View>
   );

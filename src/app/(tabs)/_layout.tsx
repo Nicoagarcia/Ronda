@@ -2,6 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Tabs } from 'expo-router';
 
 import { useMyChats } from '@/features/chat/hooks';
+import { WarningModal } from '@/features/moderation/warning-modal';
 
 type IconProps = React.ComponentProps<typeof Ionicons>;
 
@@ -18,7 +19,9 @@ export default function TabsLayout() {
   const hasUnread = chats?.some((c) => c.unread > 0) ?? false;
 
   return (
-    <Tabs screenOptions={{ headerShown: false, tabBarActiveTintColor: '#ff6b3d' }}>
+    <>
+      <WarningModal />
+      <Tabs screenOptions={{ headerShown: false, tabBarActiveTintColor: '#ff6b3d' }}>
       <Tabs.Screen name="index" options={{ title: 'Descubrir', tabBarIcon: icon('compass-outline') }} />
       <Tabs.Screen
         name="mine"
@@ -31,6 +34,7 @@ export default function TabsLayout() {
       />
       <Tabs.Screen name="create" options={{ title: 'Crear', tabBarIcon: icon('add-circle-outline') }} />
       <Tabs.Screen name="profile" options={{ title: 'Perfil', tabBarIcon: icon('person-circle-outline') }} />
-    </Tabs>
+      </Tabs>
+    </>
   );
 }

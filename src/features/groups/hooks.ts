@@ -34,7 +34,8 @@ export function useDiscoverGroups(categoryId: number | null, search: string) {
 }
 
 export const useMyGroups = () => useQuery({ queryKey: groupKeys.mine, queryFn: listMyGroups });
-export const useGroup = (id: string) => useQuery({ queryKey: groupKeys.detail(id), queryFn: () => getGroup(id) });
+export const useGroup = (id: string, enabled = true) =>
+  useQuery({ queryKey: groupKeys.detail(id), queryFn: () => getGroup(id), enabled });
 export const useGroupMembers = (id: string, enabled = true) =>
   useQuery({ queryKey: groupKeys.members(id), queryFn: () => listGroupMembers(id), enabled });
 export const useGroupRequests = (id: string) =>

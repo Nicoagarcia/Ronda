@@ -7,6 +7,7 @@ import { Header } from '@/components/ui/header';
 import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
 import { GroupCard } from '@/features/groups/components/group-card';
+import { PlanCard } from '@/features/plans/components/plan-card';
 import { ProfileCard } from '@/features/profile/components/profile-card';
 import { useProfile } from '@/features/profile/hooks';
 
@@ -51,6 +52,25 @@ export default function UserProfileScreen() {
               categoryId={g.category_id}
               memberCount={g.member_count}
               maxMembers={g.max_members}
+            />
+          ))}
+        </View>
+      ) : null}
+      {profile.extended && profile.plans?.length ? (
+        <View className="gap-2">
+          <Text variant="label">Próximos planes</Text>
+          {profile.plans.map((p) => (
+            <PlanCard
+              key={p.id}
+              id={p.id}
+              title={p.title}
+              categoryId={p.category_id}
+              startsAt={p.starts_at}
+              placeName={p.place_name}
+              zone={p.zone}
+              isPrivatePlace={p.is_private_place}
+              participantCount={p.participant_count}
+              maxParticipants={p.max_participants}
             />
           ))}
         </View>

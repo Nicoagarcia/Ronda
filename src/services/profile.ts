@@ -14,6 +14,17 @@ export type PublicProfile = {
   extended: boolean;
   bio?: string | null;
   groups?: { id: string; name: string; category_id: number; image_url: string | null; member_count: number; max_members: number }[];
+  plans?: {
+    id: string;
+    title: string;
+    category_id: number;
+    starts_at: string;
+    place_name: string;
+    zone: string | null;
+    is_private_place: boolean;
+    participant_count: number;
+    max_participants: number;
+  }[];
 };
 
 export type ProfileEdit = Pick<TablesUpdate<'profiles'>, 'name' | 'city_id' | 'bio' | 'avatar_url'>;

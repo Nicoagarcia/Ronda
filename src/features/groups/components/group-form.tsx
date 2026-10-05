@@ -3,12 +3,11 @@ import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
-import { Chip } from '@/components/ui/chip';
 import { ErrorText } from '@/components/ui/error-text';
 import { Text } from '@/components/ui/text';
 import { TextField } from '@/components/ui/text-field';
+import { CategorySelect } from '@/features/catalog/components/category-select';
 import { GroupCover } from '@/features/groups/components/group-cover';
-import { useInterests } from '@/features/profile/hooks';
 import { pickPhoto } from '@/features/profile/pick-photo';
 import type { GroupAccess, GroupInput } from '@/services/groups';
 
@@ -40,7 +39,6 @@ export function validateGroup(v: Pick<GroupFormValues, 'name' | 'description' | 
 }
 
 export function GroupForm({ initial, submitLabel, loading, error, onSubmit }: Props) {
-  const { data: interests } = useInterests();
   const [name, setName] = useState(initial?.name ?? '');
   const [description, setDescription] = useState(initial?.description ?? '');
   const [categoryId, setCategoryId] = useState<number>(initial?.categoryId ?? 0);
@@ -72,8 +70,6 @@ export function GroupForm({ initial, submitLabel, loading, error, onSubmit }: Pr
     setImageUri(picked.uri);
   };
 
-  const sections = [...new Set(interests?.map((i) => i.section))];
-
   return (
     <View className="gap-4">
       <Pressable accessibilityRole="button" accessibilityLabel="Elegir imagen del grupo" onPress={chooseImage} className="gap-2">
@@ -101,19 +97,7 @@ export function GroupForm({ initial, submitLabel, loading, error, onSubmit }: Pr
         error={show('description')}
       />
 
-      <View className="gap-2">
-        <Text variant="label">Categoría</Text>
-        {sections.map((section) => (
-          <View key={section} className="flex-row flex-wrap gap-2">
-            {interests
-              ?.filter((i) => i.section === section)
-              .map((i) => (
-                <Chip key={i.id} label={`${i.emoji} ${i.name}`} selected={categoryId === i.id} onPress={() => setCategoryId(i.id)} />
-              ))}
-          </View>
-        ))}
-        <ErrorText>{show('categoryId')}</ErrorText>
-      </View>
+      <CategorySelect value={categoryId} onChange={setCategoryId} error={show('categoryId')} />
 
       <TextField label="Zona (opcional)" value={zone} onChangeText={setZone} maxLength={40} placeholder="Centro, City Bell…" />
       <TextField

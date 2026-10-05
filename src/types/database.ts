@@ -248,6 +248,177 @@ export type Database = {
         }
         Relationships: []
       }
+      plan_participants: {
+        Row: {
+          joined_at: string
+          plan_id: string
+          reminder_sent_at: string | null
+          removed_at: string | null
+          user_id: string
+        }
+        Insert: {
+          joined_at?: string
+          plan_id: string
+          reminder_sent_at?: string | null
+          removed_at?: string | null
+          user_id: string
+        }
+        Update: {
+          joined_at?: string
+          plan_id?: string
+          reminder_sent_at?: string | null
+          removed_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_participants_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_participants_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans_with_status"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_participants_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plan_private_details: {
+        Row: {
+          address: string
+          plan_id: string
+        }
+        Insert: {
+          address: string
+          plan_id: string
+        }
+        Update: {
+          address?: string
+          plan_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_private_details_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: true
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_private_details_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: true
+            referencedRelation: "plans_with_status"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plans: {
+        Row: {
+          cancel_reason: string | null
+          cancelled_at: string | null
+          category_id: number
+          city_id: number
+          created_at: string
+          creator_id: string
+          description: string | null
+          ends_at: string | null
+          group_id: string | null
+          hidden_at: string | null
+          id: string
+          is_private_place: boolean
+          max_participants: number
+          participant_count: number
+          place_name: string
+          starts_at: string
+          title: string
+          updated_at: string
+          zone: string | null
+        }
+        Insert: {
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          category_id: number
+          city_id: number
+          created_at?: string
+          creator_id: string
+          description?: string | null
+          ends_at?: string | null
+          group_id?: string | null
+          hidden_at?: string | null
+          id?: string
+          is_private_place?: boolean
+          max_participants: number
+          participant_count?: number
+          place_name: string
+          starts_at: string
+          title: string
+          updated_at?: string
+          zone?: string | null
+        }
+        Update: {
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          category_id?: number
+          city_id?: number
+          created_at?: string
+          creator_id?: string
+          description?: string | null
+          ends_at?: string | null
+          group_id?: string | null
+          hidden_at?: string | null
+          id?: string
+          is_private_place?: boolean
+          max_participants?: number
+          participant_count?: number
+          place_name?: string
+          starts_at?: string
+          title?: string
+          updated_at?: string
+          zone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plans_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "interests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plans_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plans_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plans_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_interests: {
         Row: {
           interest_id: number
@@ -336,11 +507,122 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      plans_with_status: {
+        Row: {
+          cancel_reason: string | null
+          cancelled_at: string | null
+          category_id: number | null
+          city_id: number | null
+          created_at: string | null
+          creator_id: string | null
+          description: string | null
+          ends_at: string | null
+          group_id: string | null
+          hidden_at: string | null
+          id: string | null
+          is_private_place: boolean | null
+          max_participants: number | null
+          participant_count: number | null
+          place_name: string | null
+          starts_at: string | null
+          status: string | null
+          title: string | null
+          updated_at: string | null
+          zone: string | null
+        }
+        Insert: {
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          category_id?: number | null
+          city_id?: number | null
+          created_at?: string | null
+          creator_id?: string | null
+          description?: string | null
+          ends_at?: string | null
+          group_id?: string | null
+          hidden_at?: string | null
+          id?: string | null
+          is_private_place?: boolean | null
+          max_participants?: number | null
+          participant_count?: number | null
+          place_name?: string | null
+          starts_at?: string | null
+          status?: never
+          title?: string | null
+          updated_at?: string | null
+          zone?: string | null
+        }
+        Update: {
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          category_id?: number | null
+          city_id?: number | null
+          created_at?: string | null
+          creator_id?: string | null
+          description?: string | null
+          ends_at?: string | null
+          group_id?: string | null
+          hidden_at?: string | null
+          id?: string | null
+          is_private_place?: boolean | null
+          max_participants?: number | null
+          participant_count?: number | null
+          place_name?: string | null
+          starts_at?: string | null
+          status?: never
+          title?: string | null
+          updated_at?: string | null
+          zone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plans_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "interests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plans_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plans_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plans_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      accept_safety_notice: { Args: never; Returns: undefined }
       age_from_birthdate: { Args: { birthdate: string }; Returns: number }
+      apply_group_exit_to_plans: {
+        Args: { p_group: string; p_user: string }
+        Returns: undefined
+      }
       can_see_group: { Args: { p_group: string }; Returns: boolean }
+      can_see_plan: { Args: { p_plan: string }; Returns: boolean }
+      cancel_plan: {
+        Args: { p_plan: string; p_reason?: string }
+        Returns: undefined
+      }
+      cancel_plan_internal: {
+        Args: { p_plan: string; p_reason: string }
+        Returns: undefined
+      }
       cancel_request: { Args: { p_group: string }; Returns: undefined }
       complete_onboarding: { Args: never; Returns: undefined }
       create_group: {
@@ -351,6 +633,22 @@ export type Database = {
           p_image_url?: string
           p_max_members: number
           p_name: string
+          p_zone?: string
+        }
+        Returns: string
+      }
+      create_plan: {
+        Args: {
+          p_address?: string
+          p_category_id: number
+          p_description?: string
+          p_ends_at?: string
+          p_group_id?: string
+          p_is_private_place?: boolean
+          p_max_participants: number
+          p_place_name: string
+          p_starts_at: string
+          p_title: string
           p_zone?: string
         }
         Returns: string
@@ -384,7 +682,33 @@ export type Database = {
           zone: string
         }[]
       }
+      discover_plans: {
+        Args: {
+          p_category?: number
+          p_limit?: number
+          p_offset?: number
+          p_search?: string
+        }
+        Returns: {
+          am_participant: boolean
+          category_id: number
+          ends_at: string
+          group_id: string
+          group_name: string
+          id: string
+          is_full: boolean
+          is_private_place: boolean
+          max_participants: number
+          participant_count: number
+          place_name: string
+          preview: Json
+          starts_at: string
+          title: string
+          zone: string
+        }[]
+      }
       get_group: { Args: { p_group: string }; Returns: Json }
+      get_plan: { Args: { p_plan: string }; Returns: Json }
       get_profile: { Args: { p_id: string }; Returns: Json }
       is_active_profile: { Args: { p_id: string }; Returns: boolean }
       is_active_user: { Args: never; Returns: boolean }
@@ -397,8 +721,14 @@ export type Database = {
         Args: { p_group: string; p_user: string }
         Returns: boolean
       }
+      is_plan_participant: {
+        Args: { p_plan: string; p_user: string }
+        Returns: boolean
+      }
       join_group: { Args: { p_group: string }; Returns: string }
+      join_plan: { Args: { p_plan: string }; Returns: undefined }
       leave_group: { Args: { p_group: string }; Returns: undefined }
+      leave_plan: { Args: { p_plan: string }; Returns: undefined }
       list_group_members: {
         Args: { p_group: string }
         Returns: {
@@ -407,6 +737,20 @@ export type Database = {
           name: string
           role: Database["public"]["Enums"]["group_role"]
           user_id: string
+        }[]
+      }
+      list_group_plans: {
+        Args: { p_group: string }
+        Returns: {
+          am_participant: boolean
+          category_id: number
+          id: string
+          max_participants: number
+          participant_count: number
+          place_name: string
+          starts_at: string
+          title: string
+          zone: string
         }[]
       }
       list_group_requests: {
@@ -435,10 +779,40 @@ export type Database = {
           pending_count: number
         }[]
       }
+      list_my_plans: {
+        Args: never
+        Returns: {
+          category_id: number
+          ends_at: string
+          group_name: string
+          id: string
+          is_creator: boolean
+          max_participants: number
+          participant_count: number
+          place_name: string
+          starts_at: string
+          status: string
+          title: string
+          zone: string
+        }[]
+      }
       normalize_text: { Args: { t: string }; Returns: string }
       owns_group_folder: { Args: { p_folder: string }; Returns: boolean }
+      plan_effective_end: {
+        Args: { p_ends_at: string; p_starts_at: string }
+        Returns: string
+      }
+      plan_preview: { Args: { p_limit: number; p_plan: string }; Returns: Json }
+      plan_status: {
+        Args: { p_cancelled_at: string; p_ends_at: string; p_starts_at: string }
+        Returns: string
+      }
       remove_member: {
         Args: { p_group: string; p_user: string }
+        Returns: undefined
+      }
+      remove_participant: {
+        Args: { p_plan: string; p_user: string }
         Returns: undefined
       }
       set_my_birthdate: { Args: { p_birthdate: string }; Returns: undefined }
@@ -458,6 +832,33 @@ export type Database = {
           p_max_members: number
           p_name: string
           p_zone?: string
+        }
+        Returns: undefined
+      }
+      update_plan: {
+        Args: {
+          p_address?: string
+          p_category_id: number
+          p_description?: string
+          p_ends_at?: string
+          p_is_private_place?: boolean
+          p_max_participants: number
+          p_place_name: string
+          p_plan: string
+          p_starts_at: string
+          p_title: string
+          p_zone?: string
+        }
+        Returns: boolean
+      }
+      validate_plan_input: {
+        Args: {
+          p_address: string
+          p_check_start: boolean
+          p_ends_at: string
+          p_group: string
+          p_is_private_place: boolean
+          p_starts_at: string
         }
         Returns: undefined
       }

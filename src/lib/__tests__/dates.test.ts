@@ -1,4 +1,4 @@
-import { ageOn, parseCalendarDate, todayInArgentina, toIsoDate } from '@/lib/dates';
+import { ageOn, formatPlanWhen, fromArgentina, parseCalendarDate, todayInArgentina, toIsoDate } from '@/lib/dates';
 
 describe('parseCalendarDate', () => {
   it('acepta fechas válidas', () => {
@@ -43,5 +43,34 @@ describe('todayInArgentina', () => {
 describe('toIsoDate', () => {
   it('completa con ceros', () => {
     expect(toIsoDate({ year: 2000, month: 5, day: 3 })).toBe('2000-05-03');
+  });
+});
+
+describe('formatPlanWhen', () => {
+  // Domingo 5/10/2026, 12:00 en Argentina (15:00 UTC).
+  const now = new Date('2026-10-05T15:00:00Z');
+
+  it('hoy y mañana', () => {
+    expect(formatPlanWhen('2026-10-05T21:00:00Z', now)).toBe('Hoy 18:00');
+    expect(formatPlanWhen('2026-10-06T21:00:00Z', now)).toBe('Mañana 18:00');
+  });
+
+  it('usa el día de Argentina, no el de UTC', () => {
+    // 23:30 del 5/10 en Argentina = 02:30 del 6/10 en UTC.
+    expect(formatPlanWhen('2026-10-06T02:30:00Z', now)).toBe('Hoy 23:30');
+  });
+
+  it('esta semana muestra el día', () => {
+    expect(formatPlanWhen('2026-10-10T21:00:00Z', now)).toBe('Sáb 18:00');
+  });
+
+  it('más adelante muestra la fecha', () => {
+    expect(formatPlanWhen('2026-10-17T21:00:00Z', now)).toBe('Sáb 17/10 18:00');
+  });
+});
+
+describe('fromArgentina', () => {
+  it('interpreta la hora como hora de Argentina', () => {
+    expect(fromArgentina({ year: 2026, month: 10, day: 10 }, '18:00').toISOString()).toBe('2026-10-10T21:00:00.000Z');
   });
 });

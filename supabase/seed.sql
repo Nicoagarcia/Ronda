@@ -81,3 +81,42 @@ join (values
   ('Fútbol 5 de los jueves', 'a0000000-0000-0000-0000-000000000001'),
   ('Running La Plata', 'a0000000-0000-0000-0000-000000000001')
 ) as m (group_name, user_id) on m.group_name = g.name;
+
+-- Planes, con fechas relativas a hoy (hora de Argentina).
+update public.profiles set safety_notice_accepted_at = now() where id::text like 'a0000000-%';
+
+with nuevos (title, description, slug, group_name, place_name, zone, days, at, max, creator, private_address) as (
+  values
+    ('Patinar en el Bosque', 'Vuelta tranqui por el lago. Traigan casco.', 'patinaje', 'Patinadores de La Plata', 'Lago del Bosque', 'Bosque', 1, '18:00', 10, 1, null),
+    ('Café para recién llegados', 'Nos juntamos a charlar y conocernos. Primera vez, ¡vengan!', 'cafe', null, 'Café Martinica', 'Centro', 1, '10:30', 6, 1, null),
+    ('Fútbol 5 de esta semana', 'Falta gente para completar los dos equipos.', 'futbol', 'Fútbol 5 de los jueves', 'Cancha La Redonda', 'Tolosa', 2, '21:00', 10, 2, null),
+    ('Running 10K', 'Ritmo suave, 6 min/km. Salimos de la puerta del Zoo.', 'running', 'Running La Plata', 'Entrada del Zoológico', 'Bosque', 3, '08:00', 15, 3, null),
+    ('Estudiar para el parcial de Psico', 'Repasamos las unidades 1 a 3 con mate.', 'estudiar', 'Psicología 1° año', 'Lo de Ana', 'Centro', 4, '17:00', 5, 1, 'Calle 50 n° 1234, depto 3B'),
+    ('Juegos de mesa en el bar', 'Llevo Catan y Dixit.', 'juegos-de-mesa', 'Juegos de mesa', 'Bar La Cumbre', 'Centro', 5, '20:00', 8, 2, null)
+),
+creados as (
+  insert into public.plans (title, description, category_id, city_id, group_id, place_name, zone, is_private_place,
+                            starts_at, max_participants, creator_id)
+  select n.title, n.description, i.id, (select id from public.cities where name = 'La Plata'),
+         (select g.id from public.groups g where g.name = n.group_name), n.place_name, n.zone, n.private_address is not null,
+         ((public.today_ar() + n.days) + n.at::time) at time zone 'America/Argentina/Buenos_Aires',
+         n.max, ('a0000000-0000-0000-0000-00000000000' || n.creator)::uuid
+  from nuevos n
+  join public.interests i on i.slug = n.slug
+  returning id, title, creator_id
+)
+insert into public.plan_participants (plan_id, user_id)
+select id, creator_id from creados;
+
+insert into public.plan_private_details (plan_id, address)
+select id, 'Calle 50 n° 1234, depto 3B' from public.plans where is_private_place;
+
+insert into public.plan_participants (plan_id, user_id)
+select p.id, m.user_id::uuid
+from public.plans p
+join (values
+  ('Patinar en el Bosque', 'a0000000-0000-0000-0000-000000000003'),
+  ('Fútbol 5 de esta semana', 'a0000000-0000-0000-0000-000000000001'),
+  ('Running 10K', 'a0000000-0000-0000-0000-000000000001'),
+  ('Café para recién llegados', 'a0000000-0000-0000-0000-000000000002')
+) as m (title, user_id) on m.title = p.title;

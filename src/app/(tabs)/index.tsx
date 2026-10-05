@@ -10,12 +10,14 @@ import { Text } from '@/components/ui/text';
 import { CategoryFilter } from '@/features/groups/components/category-filter';
 import { GroupCard } from '@/features/groups/components/group-card';
 import { useDiscoverGroups } from '@/features/groups/hooks';
+import { PlanCard } from '@/features/plans/components/plan-card';
+import { useDiscoverPlans } from '@/features/plans/hooks';
 import { useDebouncedValue } from '@/lib/use-debounced-value';
 
 type Tab = 'plans' | 'groups';
 
 export default function DiscoverScreen() {
-  const [tab, setTab] = useState<Tab>('groups');
+  const [tab, setTab] = useState<Tab>('plans');
 
   return (
     <Screen>
@@ -28,11 +30,7 @@ export default function DiscoverScreen() {
         value={tab}
         onChange={setTab}
       />
-      {tab === 'groups' ? (
-        <DiscoverGroups />
-      ) : (
-        <EmptyState emoji="🗓️" title="Los planes llegan en el Hito 3" />
-      )}
+      {tab === 'groups' ? <DiscoverGroups /> : <DiscoverPlans />}
     </Screen>
   );
 }
@@ -45,14 +43,7 @@ function DiscoverGroups() {
 
   return (
     <View className="flex-1 gap-3">
-      <TextInput
-        value={search}
-        onChangeText={setSearch}
-        placeholder="Buscar grupos"
-        placeholderTextColor="#a8a29e"
-        className="h-11 rounded-xl border border-line bg-surface px-4 text-base text-ink"
-        returnKeyType="search"
-      />
+      <SearchBox value={search} onChange={setSearch} placeholder="Buscar grupos" />
       <CategoryFilter selected={categoryId} onChange={setCategoryId} />
       <FlatList
         data={data ?? []}
@@ -80,6 +71,66 @@ function DiscoverGroups() {
               title={search || categoryId ? 'No encontramos grupos' : 'Todavía no hay grupos en tu ciudad'}
               description="¿Por qué no armás el primero?">
               <Button title="Crear un grupo" className="mt-3" onPress={() => router.push('/group/new')} />
+            </EmptyState>
+          )
+        }
+      />
+    </View>
+  );
+}
+
+function SearchBox({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder: string }) {
+  return (
+    <TextInput
+      value={value}
+      onChangeText={onChange}
+      placeholder={placeholder}
+      placeholderTextColor="#a8a29e"
+      className="h-11 rounded-xl border border-line bg-surface px-4 text-base text-ink"
+      returnKeyType="search"
+    />
+  );
+}
+
+function DiscoverPlans() {
+  const [search, setSearch] = useState('');
+  const [categoryId, setCategoryId] = useState<number | null>(null);
+  const debouncedSearch = useDebouncedValue(search, 300);
+  const { data, isPending, isRefetching, refetch } = useDiscoverPlans(categoryId, debouncedSearch);
+
+  return (
+    <View className="flex-1 gap-3">
+      <SearchBox value={search} onChange={setSearch} placeholder="Buscar planes" />
+      <CategoryFilter selected={categoryId} onChange={setCategoryId} />
+      <FlatList
+        data={data ?? []}
+        keyExtractor={(p) => p.id}
+        contentContainerClassName="gap-3 grow pb-4"
+        refreshing={isRefetching}
+        onRefresh={refetch}
+        renderItem={({ item }) => (
+          <PlanCard
+            id={item.id}
+            title={item.title}
+            categoryId={item.category_id}
+            startsAt={item.starts_at}
+            placeName={item.place_name}
+            zone={item.zone}
+            isPrivatePlace={item.is_private_place}
+            participantCount={item.participant_count}
+            maxParticipants={item.max_participants}
+            groupName={item.group_name}
+            amParticipant={item.am_participant}
+            preview={item.preview as { id: string; name: string; avatar_url: string }[]}
+          />
+        )}
+        ListEmptyComponent={
+          isPending ? null : (
+            <EmptyState
+              emoji="🗓️"
+              title={search || categoryId ? 'No encontramos planes' : 'No hay planes próximos en tu ciudad'}
+              description="Armá uno y que se sume la gente.">
+              <Button title="Crear un plan" className="mt-3" onPress={() => router.push('/plan/new')} />
             </EmptyState>
           )
         }

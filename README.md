@@ -39,10 +39,10 @@ npm start                   # Metro; abrir desde la development build en el celu
 
 Los mails locales (códigos de registro y de contraseña) se ven en http://localhost:54324.
 
-`npm run db:reset` carga datos de prueba (`supabase/seed.sql`): 8 grupos en La Plata y 3 usuarios demo
+`npm run db:reset` carga datos de prueba (`supabase/seed.sql`): 8 grupos y 6 planes en La Plata, y 3 usuarios demo
 (`ana@demo.ronda`, `beto@demo.ronda`, `caro@demo.ronda`, contraseña `ronda1234`).
 
-| `npm run test:concurrency` | Prueba que dos personas no ocupen el último lugar de un grupo (spec 02, AC-12) |
+| `npm run test:concurrency` | Prueba que dos personas no ocupen el último lugar de un grupo o plan (spec 02 AC-12, spec 03 AC-14) |
 
 ## Development build
 

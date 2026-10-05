@@ -12,6 +12,8 @@ import { Text } from '@/components/ui/text';
 import { useCategory } from '@/features/groups/categories';
 import { GroupCover } from '@/features/groups/components/group-cover';
 import { useCancelRequest, useGroup, useJoinGroup, useLeaveGroup } from '@/features/groups/hooks';
+import { PlanCard } from '@/features/plans/components/plan-card';
+import { useGroupPlans } from '@/features/plans/hooks';
 import { errorMessage } from '@/lib/errors';
 import type { GroupDetail } from '@/services/groups';
 
@@ -84,10 +86,7 @@ function GroupContent({ group }: { group: GroupDetail }) {
         </View>
       </Pressable>
 
-      <View className="gap-1 rounded-2xl border border-dashed border-line p-4">
-        <Text variant="label">Planes del grupo</Text>
-        <Text variant="muted">Llegan en el Hito 3.</Text>
-      </View>
+      <GroupPlans group={group} />
 
       {isOwner ? <OwnerActions group={group} /> : isMember ? <MemberActions group={group} /> : null}
     </Screen>
@@ -169,6 +168,47 @@ function MemberActions({ group }: { group: GroupDetail }) {
       <Row icon="exit-outline" label="Salir del grupo" danger onPress={confirmLeave} />
       <Row icon="flag-outline" label="Reportar grupo" onPress={() => Alert.alert('Próximamente', 'Reportar llega en el Hito 6.')} />
       <ErrorText>{leave.error ? errorMessage(leave.error) : null}</ErrorText>
+    </View>
+  );
+}
+
+// Planes próximos del grupo. Los miembros pueden crear uno nuevo (spec 03).
+function GroupPlans({ group }: { group: GroupDetail }) {
+  const isMember = group.my_status === 'active';
+  // En un grupo con aprobación, solo los miembros ven los planes.
+  const canSee = isMember || group.access === 'open';
+  const { data: plans } = useGroupPlans(group.id, canSee);
+
+  if (!canSee) return null;
+
+  return (
+    <View className="gap-2">
+      <View className="flex-row items-center justify-between">
+        <Text variant="label">Planes del grupo</Text>
+        {isMember ? (
+          <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/plan/new', params: { groupId: group.id } })} hitSlop={8}>
+            <Text className="font-semibold text-brand-700">+ Crear plan</Text>
+          </Pressable>
+        ) : null}
+      </View>
+      {plans?.length ? (
+        plans.map((p) => (
+          <PlanCard
+            key={p.id}
+            id={p.id}
+            title={p.title}
+            categoryId={p.category_id}
+            startsAt={p.starts_at}
+            placeName={p.place_name}
+            zone={p.zone}
+            participantCount={p.participant_count}
+            maxParticipants={p.max_participants}
+            amParticipant={p.am_participant}
+          />
+        ))
+      ) : (
+        <Text variant="muted">No hay planes próximos.</Text>
+      )}
     </View>
   );
 }

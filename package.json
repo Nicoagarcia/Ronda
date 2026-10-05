@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
+    "@react-native-community/datetimepicker": "9.1.0",
     "@supabase/supabase-js": "^2.109.0",
     "@tanstack/react-query": "^5.104.1",
     "@types/jest": "29.5.14",
@@ -57,7 +58,7 @@
     "test": "jest",
     "functions:serve": "supabase functions serve",
     "start:go": "expo start --go",
-    "test:concurrency": "node scripts/concurrency/join-last-spot.mjs"
+    "test:concurrency": "node scripts/concurrency/last-spot.mjs"
   },
   "private": true,
   "jest": {

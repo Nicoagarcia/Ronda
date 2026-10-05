@@ -24,7 +24,7 @@ export default function CreateScreen() {
   return (
     <Screen>
       <Text variant="title">Crear</Text>
-      <Option emoji="🗓️" title="Un plan" description="Una actividad puntual: patinar el sábado, un café, estudiar juntos. Llega en el Hito 3." />
+      <Option emoji="🗓️" title="Un plan" description="Una actividad puntual: patinar el sábado, un café, estudiar juntos." onPress={() => router.push('/plan/new')} />
       <Option emoji="👥" title="Un grupo" description="Una comunidad para juntarse seguido: un deporte, una carrera, un barrio." onPress={() => router.push('/group/new')} />
     </Screen>
   );

@@ -67,6 +67,62 @@ export type Database = {
           },
         ]
       }
+      chat_reads: {
+        Row: {
+          group_id: string | null
+          last_notified_at: string | null
+          last_read_at: string
+          muted: boolean
+          plan_id: string | null
+          user_id: string
+        }
+        Insert: {
+          group_id?: string | null
+          last_notified_at?: string | null
+          last_read_at?: string
+          muted?: boolean
+          plan_id?: string | null
+          user_id: string
+        }
+        Update: {
+          group_id?: string | null
+          last_notified_at?: string | null
+          last_read_at?: string
+          muted?: boolean
+          plan_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_reads_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_reads_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_reads_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans_with_status"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_reads_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cities: {
         Row: {
           created_at: string
@@ -247,6 +303,71 @@ export type Database = {
           slug?: string
         }
         Relationships: []
+      }
+      messages: {
+        Row: {
+          body: string
+          created_at: string
+          deleted_by: Database["public"]["Enums"]["message_deleted_by"] | null
+          group_id: string | null
+          hidden_at: string | null
+          id: string
+          kind: Database["public"]["Enums"]["message_kind"]
+          plan_id: string | null
+          sender_id: string | null
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          deleted_by?: Database["public"]["Enums"]["message_deleted_by"] | null
+          group_id?: string | null
+          hidden_at?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["message_kind"]
+          plan_id?: string | null
+          sender_id?: string | null
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          deleted_by?: Database["public"]["Enums"]["message_deleted_by"] | null
+          group_id?: string | null
+          hidden_at?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["message_kind"]
+          plan_id?: string | null
+          sender_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans_with_status"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       plan_participants: {
         Row: {
@@ -613,7 +734,15 @@ export type Database = {
         Args: { p_group: string; p_user: string }
         Returns: undefined
       }
+      can_read_chat: {
+        Args: { p_group: string; p_plan: string; p_user: string }
+        Returns: boolean
+      }
       can_see_group: { Args: { p_group: string }; Returns: boolean }
+      can_see_message: {
+        Args: { m: Database["public"]["Tables"]["messages"]["Row"] }
+        Returns: boolean
+      }
       can_see_plan: { Args: { p_plan: string }; Returns: boolean }
       cancel_plan: {
         Args: { p_plan: string; p_reason?: string }
@@ -624,6 +753,10 @@ export type Database = {
         Returns: undefined
       }
       cancel_request: { Args: { p_group: string }; Returns: undefined }
+      chat_closed_reason: {
+        Args: { p_group: string; p_plan: string }
+        Returns: string
+      }
       complete_onboarding: { Args: never; Returns: undefined }
       create_group: {
         Args: {
@@ -661,6 +794,7 @@ export type Database = {
         Args: { p_confirm_name: string; p_group: string }
         Returns: undefined
       }
+      delete_message: { Args: { p_message: string }; Returns: undefined }
       discover_groups: {
         Args: {
           p_category?: number
@@ -707,7 +841,10 @@ export type Database = {
           zone: string
         }[]
       }
+      format_ar: { Args: { p_ts: string }; Returns: string }
+      get_chat: { Args: { p_group?: string; p_plan?: string }; Returns: Json }
       get_group: { Args: { p_group: string }; Returns: Json }
+      get_message: { Args: { p_message: string }; Returns: Json }
       get_plan: { Args: { p_plan: string }; Returns: Json }
       get_profile: { Args: { p_id: string }; Returns: Json }
       is_active_profile: { Args: { p_id: string }; Returns: boolean }
@@ -764,6 +901,31 @@ export type Database = {
           user_id: string
         }[]
       }
+      list_messages: {
+        Args: {
+          p_before_created?: string
+          p_before_id?: string
+          p_group?: string
+          p_limit?: number
+          p_plan?: string
+        }
+        Returns: Json[]
+      }
+      list_my_chats: {
+        Args: never
+        Returns: {
+          category_id: number
+          group_id: string
+          image_url: string
+          last_activity_at: string
+          last_message: Json
+          muted: boolean
+          plan_id: string
+          plan_status: string
+          title: string
+          unread: number
+        }[]
+      }
       list_my_groups: {
         Args: never
         Returns: {
@@ -796,6 +958,14 @@ export type Database = {
           zone: string
         }[]
       }
+      mark_read: {
+        Args: { p_group?: string; p_plan?: string }
+        Returns: undefined
+      }
+      message_view: {
+        Args: { m: Database["public"]["Tables"]["messages"]["Row"] }
+        Returns: Json
+      }
       normalize_text: { Args: { t: string }; Returns: string }
       owns_group_folder: { Args: { p_folder: string }; Returns: boolean }
       plan_effective_end: {
@@ -807,12 +977,29 @@ export type Database = {
         Args: { p_cancelled_at: string; p_ends_at: string; p_starts_at: string }
         Returns: string
       }
+      post_system_message: {
+        Args: {
+          p_body: string
+          p_group: string
+          p_plan: string
+          p_subject: string
+        }
+        Returns: undefined
+      }
       remove_member: {
         Args: { p_group: string; p_user: string }
         Returns: undefined
       }
       remove_participant: {
         Args: { p_plan: string; p_user: string }
+        Returns: undefined
+      }
+      send_message: {
+        Args: { p_body: string; p_group?: string; p_plan?: string }
+        Returns: Json
+      }
+      set_chat_muted: {
+        Args: { p_group?: string; p_muted: boolean; p_plan?: string }
         Returns: undefined
       }
       set_my_birthdate: { Args: { p_birthdate: string }; Returns: undefined }
@@ -867,6 +1054,8 @@ export type Database = {
       group_access: "open" | "approval"
       group_role: "owner" | "member"
       member_status: "pending" | "active" | "rejected" | "banned"
+      message_deleted_by: "author" | "moderator"
+      message_kind: "text" | "system"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1000,6 +1189,8 @@ export const Constants = {
       group_access: ["open", "approval"],
       group_role: ["owner", "member"],
       member_status: ["pending", "active", "rejected", "banned"],
+      message_deleted_by: ["author", "moderator"],
+      message_kind: ["text", "system"],
     },
   },
 } as const

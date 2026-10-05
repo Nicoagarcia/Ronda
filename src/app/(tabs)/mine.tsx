@@ -1,33 +1,37 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { SectionList } from 'react-native';
+import { FlatList, SectionList, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Screen } from '@/components/ui/screen';
 import { Segmented } from '@/components/ui/segmented';
 import { Text } from '@/components/ui/text';
+import { useAuth } from '@/features/auth/auth-provider';
+import { ChatListItem } from '@/features/chat/components/chat-list-item';
+import { useMyChats } from '@/features/chat/hooks';
 import { GroupCard } from '@/features/groups/components/group-card';
 import { useMyGroups } from '@/features/groups/hooks';
 import { PlanCard } from '@/features/plans/components/plan-card';
 import { useMyPlans } from '@/features/plans/hooks';
 
-type Tab = 'plans' | 'groups';
+type Tab = 'chats' | 'plans' | 'groups';
 
 export default function MineScreen() {
-  const [tab, setTab] = useState<Tab>('plans');
+  const [tab, setTab] = useState<Tab>('chats');
   return (
     <Screen>
       <Text variant="title">Lo mío</Text>
       <Segmented
         options={[
+          { value: 'chats', label: 'Chats' },
           { value: 'plans', label: 'Planes' },
           { value: 'groups', label: 'Grupos' },
         ]}
         value={tab}
         onChange={setTab}
       />
-      {tab === 'plans' ? <MyPlans /> : <MyGroups />}
+      {tab === 'chats' ? <MyChats /> : tab === 'plans' ? <MyPlans /> : <MyGroups />}
     </Screen>
   );
 }
@@ -119,6 +123,31 @@ function MyGroups() {
         isPending ? null : (
           <EmptyState emoji="👥" title="Todavía no estás en ningún grupo" description="Buscá uno que te guste o creá el tuyo.">
             <Button title="Descubrir grupos" className="mt-3" onPress={() => router.push('/')} />
+          </EmptyState>
+        )
+      }
+    />
+  );
+}
+
+// Chats de grupos y planes, el de actividad más reciente primero (spec 04, AC-24).
+function MyChats() {
+  const { session } = useAuth();
+  const { data, isPending, isRefetching, refetch } = useMyChats();
+
+  return (
+    <FlatList
+      data={data ?? []}
+      keyExtractor={(c) => c.group_id ?? c.plan_id!}
+      contentContainerClassName="grow pb-4"
+      refreshing={isRefetching}
+      onRefresh={refetch}
+      ItemSeparatorComponent={() => <View className="ml-16 h-px bg-line" />}
+      renderItem={({ item }) => <ChatListItem chat={item} myId={session?.user.id} />}
+      ListEmptyComponent={
+        isPending ? null : (
+          <EmptyState emoji="💬" title="Todavía no tenés chats" description="Cada grupo y plan al que te sumes tiene su chat.">
+            <Button title="Descubrir planes" className="mt-3" onPress={() => router.push('/')} />
           </EmptyState>
         )
       }

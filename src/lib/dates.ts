@@ -93,3 +93,18 @@ export function formatCalendarDate({ year, month, day }: CalendarDate): string {
   const weekday = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
   return `${['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'][weekday]} ${day}/${month}/${year}`;
 }
+
+// Clave del día en Argentina ("2026-10-05"), para separar mensajes por día.
+export function arDayKey(iso: string): string {
+  return toIsoDate(todayInArgentina(new Date(iso)));
+}
+
+// "Hoy", "Ayer" o "Sáb 10/10".
+export function dayLabel(iso: string, now: Date = new Date()): string {
+  const day = todayInArgentina(new Date(iso));
+  const diff = daysBetween(day, todayInArgentina(now));
+  if (diff === 0) return 'Hoy';
+  if (diff === 1) return 'Ayer';
+  const weekday = new Date(Date.UTC(day.year, day.month - 1, day.day)).getUTCDay();
+  return `${['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'][weekday]} ${day.day}/${day.month}`;
+}

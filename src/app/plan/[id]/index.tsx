@@ -146,7 +146,7 @@ function PlanAction({ plan }: { plan: PlanDetail }) {
   if (plan.am_participant) {
     action = (
       <View className="gap-2">
-        <Button title="Chat del plan (Hito 4)" variant="secondary" disabled />
+        <Button title="💬 Chat del plan" onPress={() => router.push(`/plan/${plan.id}/chat`)} />
         {upcoming && !plan.is_creator ? <Button title="Bajarme" variant="ghost" loading={leave.isPending} onPress={confirmLeave} /> : null}
       </View>
     );

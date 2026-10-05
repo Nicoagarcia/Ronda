@@ -11,6 +11,7 @@
     "base64-arraybuffer": "^1.0.2",
     "eslint-config-expo": "~57.0.2",
     "expo": "~57.0.26",
+    "expo-clipboard": "~57.0.2",
     "expo-constants": "~57.0.20",
     "expo-dev-client": "~57.0.19",
     "expo-device": "~57.0.2",
@@ -58,7 +59,8 @@
     "test": "jest",
     "functions:serve": "supabase functions serve",
     "start:go": "expo start --go",
-    "test:concurrency": "node scripts/concurrency/last-spot.mjs"
+    "test:concurrency": "node scripts/concurrency/last-spot.mjs",
+    "test:realtime": "node scripts/realtime/chat-delivery.mjs"
   },
   "private": true,
   "jest": {

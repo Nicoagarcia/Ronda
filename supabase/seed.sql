@@ -120,3 +120,17 @@ join (values
   ('Running 10K', 'a0000000-0000-0000-0000-000000000001'),
   ('Café para recién llegados', 'a0000000-0000-0000-0000-000000000002')
 ) as m (title, user_id) on m.title = p.title;
+
+-- Algunos mensajes de ejemplo (los de "se unió" y "se sumó" los crea la base sola).
+insert into public.messages (group_id, plan_id, sender_id, body, created_at)
+select g.id, p.id, ('a0000000-0000-0000-0000-00000000000' || x.sender)::uuid, x.body, now() - (x.minutes_ago || ' minutes')::interval
+from (values
+  ('Nuevos en La Plata', null, 1, '¡Hola! Me mudé hace un mes, ¿alguien para un café esta semana?', 180),
+  ('Nuevos en La Plata', null, 2, 'Yo! Llegué en marzo. Armemos algo', 170),
+  ('Nuevos en La Plata', null, 3, 'Me sumo. Dejo el link de un lugar lindo: https://maps.app.goo.gl/ejemplo', 160),
+  ('Nuevos en La Plata', null, 1, 'Listo, creé el plan del café para mañana 🙌', 30),
+  (null, 'Patinar en el Bosque', 1, 'Nos encontramos en la entrada del lago', 60),
+  (null, 'Patinar en el Bosque', 3, '¡Perfecto! Llevo patines de repuesto por si alguien necesita', 45)
+) as x (group_name, plan_title, sender, body, minutes_ago)
+left join public.groups g on g.name = x.group_name
+left join public.plans p on p.title = x.plan_title;

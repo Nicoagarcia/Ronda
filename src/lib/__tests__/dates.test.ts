@@ -1,4 +1,4 @@
-import { ageOn, formatPlanWhen, fromArgentina, parseCalendarDate, todayInArgentina, toIsoDate } from '@/lib/dates';
+import { ageOn, dayLabel, formatPlanWhen, fromArgentina, parseCalendarDate, todayInArgentina, toIsoDate } from '@/lib/dates';
 
 describe('parseCalendarDate', () => {
   it('acepta fechas válidas', () => {
@@ -72,5 +72,19 @@ describe('formatPlanWhen', () => {
 describe('fromArgentina', () => {
   it('interpreta la hora como hora de Argentina', () => {
     expect(fromArgentina({ year: 2026, month: 10, day: 10 }, '18:00').toISOString()).toBe('2026-10-10T21:00:00.000Z');
+  });
+});
+
+describe('dayLabel', () => {
+  const now = new Date('2026-10-05T15:00:00Z'); // domingo 5/10, 12:00 en Argentina
+
+  it('hoy, ayer y días anteriores', () => {
+    expect(dayLabel('2026-10-05T12:00:00Z', now)).toBe('Hoy');
+    expect(dayLabel('2026-10-04T12:00:00Z', now)).toBe('Ayer');
+    expect(dayLabel('2026-10-03T12:00:00Z', now)).toBe('Sáb 3/10');
+  });
+
+  it('un mensaje de las 23:30 de ayer en Argentina es "Ayer" aunque en UTC sea hoy', () => {
+    expect(dayLabel('2026-10-05T02:30:00Z', now)).toBe('Ayer');
   });
 });

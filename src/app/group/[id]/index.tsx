@@ -101,7 +101,7 @@ function MembershipAction({ group }: { group: GroupDetail }) {
 
   let action: React.ReactNode;
   if (group.my_status === 'active') {
-    action = <Button title="Chat del grupo (Hito 4)" variant="secondary" disabled />;
+    action = <Button title="💬 Chat del grupo" onPress={() => router.push(`/group/${group.id}/chat`)} />;
   } else if (group.my_status === 'pending') {
     action = <Button title="Solicitud enviada · Cancelar" variant="secondary" loading={cancel.isPending} onPress={() => cancel.mutate()} />;
   } else if (group.my_status === 'rejected' && group.rejoin_after && new Date(group.rejoin_after) > new Date()) {

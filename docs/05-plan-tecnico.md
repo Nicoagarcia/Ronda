@@ -1,6 +1,6 @@
 # Ronda — Plan técnico v0
 
-> Estado: **borrador** · Base: `04-decisiones-y-mvp-v0.md` y `specs/01` a `specs/06` (aprobadas)
+> Estado: **aprobado** · Hito 0 completo (2026-10-05) · Base: `04-decisiones-y-mvp-v0.md` y `specs/01` a `specs/06` (aprobadas)
 >
 > Este documento dice **cómo** se construye lo que las specs dicen **qué** hacer. Si algo choca, mandan las specs.
 
@@ -60,7 +60,7 @@ ronda/
 │   ├── components/ui/          ← botones, inputs, tarjetas
 │   ├── lib/                    ← cliente Supabase, QueryClient, fechas
 │   └── types/database.ts       ← generado desde la base
-├── app.config.ts
+├── app.json
 ├── eas.json
 └── package.json
 ```
@@ -73,9 +73,9 @@ ronda/
 |---|---|
 | Base | Expo SDK (última estable al hacer el setup) + TypeScript estricto |
 | Navegación | Expo Router (`src/app`) |
-| Estilos | NativeWind |
+| Estilos | Uniwind (Tailwind 4 para React Native). NativeWind estable todavía usa Tailwind 3 |
 | Datos | TanStack Query + supabase-js |
-| Sesión | supabase-js con AsyncStorage |
+| Sesión | supabase-js con `expo-sqlite/localStorage` (método recomendado por Expo) |
 | Login Google | `@react-native-google-signin/google-signin` + `signInWithIdToken` |
 | Formularios | react-hook-form + zod |
 | Fechas | date-fns + date-fns-tz (todo en UTC en la base, se muestra en hora de Argentina) |
@@ -84,7 +84,7 @@ ronda/
 | Errores | Sentry |
 | Métricas | PostHog |
 
-Las versiones exactas se fijan en el Hito 0, verificando compatibilidad entre Expo y NativeWind.
+Versiones fijadas en el Hito 0: Expo SDK 57, React Native 0.86, React 19.2, Uniwind 1.12, Tailwind 4.3.
 
 ---
 

@@ -1,0 +1,20 @@
+@import 'tailwindcss';
+@import 'uniwind';
+
+/* Paleta de Ronda. Usar siempre estos tokens, no colores sueltos. */
+@theme {
+  --color-brand-50: #fff4ef;
+  --color-brand-100: #ffe4d8;
+  --color-brand-500: #ff6b3d;
+  --color-brand-600: #ec5428;
+  --color-brand-700: #c4401b;
+
+  --color-ink: #1c1917;
+  --color-muted: #78716c;
+  --color-line: #e7e5e4;
+  --color-surface: #ffffff;
+  --color-canvas: #fafaf9;
+
+  --color-danger: #dc2626;
+  --color-success: #16a34a;
+}

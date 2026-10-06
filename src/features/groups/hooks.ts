@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { track } from '@/lib/analytics';
 import {
   cancelRequest,
   createGroup,
@@ -51,10 +52,19 @@ function useGroupMutation<T, R>(fn: (input: T) => Promise<R>) {
 }
 
 export const useCreateGroup = () =>
-  useGroupMutation(({ input, imageUri }: { input: GroupInput; imageUri: string | null }) => createGroup(input, imageUri));
+  useGroupMutation(async ({ input, imageUri }: { input: GroupInput; imageUri: string | null }) => {
+    const id = await createGroup(input, imageUri);
+    track('group_created', { access: input.access, max_members: input.maxMembers, category_id: input.categoryId });
+    return id;
+  });
 export const useUpdateGroup = (id: string) =>
   useGroupMutation(({ input, imageUri }: { input: GroupInput; imageUri: string | null }) => updateGroup(id, input, imageUri));
-export const useJoinGroup = (id: string) => useGroupMutation(() => joinGroup(id));
+export const useJoinGroup = (id: string) =>
+  useGroupMutation(async () => {
+    const result = await joinGroup(id);
+    track(result === 'joined' ? 'group_joined' : 'group_requested');
+    return result;
+  });
 export const useCancelRequest = (id: string) => useGroupMutation(() => cancelRequest(id));
 export const useLeaveGroup = (id: string) => useGroupMutation(() => leaveGroup(id));
 export const useDecideRequest = (id: string) =>

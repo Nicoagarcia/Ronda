@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useAuth } from '@/features/auth/auth-provider';
+import { track } from '@/lib/analytics';
 import { listCities, listInterests } from '@/services/catalog';
 import {
   completeOnboarding,
@@ -48,4 +49,8 @@ export const useUpdateMyProfile = () => useProfileMutation((changes: ProfileEdit
 export const useSetMyBirthdate = () => useProfileMutation((iso: string) => setMyBirthdate(iso));
 export const useSetMyInterests = () => useProfileMutation((ids: number[]) => setMyInterests(ids));
 export const useUploadAvatar = () => useProfileMutation((uri: string) => uploadAvatar(uri));
-export const useCompleteOnboarding = () => useProfileMutation(() => completeOnboarding());
+export const useCompleteOnboarding = () =>
+  useProfileMutation(async () => {
+    await completeOnboarding();
+    track('onboarding_completed');
+  });

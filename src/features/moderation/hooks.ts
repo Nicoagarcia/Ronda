@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert } from 'react-native';
 
+import { track } from '@/lib/analytics';
 import { errorMessage } from '@/lib/errors';
 import { removeMember } from '@/services/groups';
 import { ackWarning, blockUser, getMyWarning, listBlocked, mySpacesWith, unblockUser } from '@/services/moderation';
@@ -45,6 +46,7 @@ export function useBlockFlow() {
           onPress: async () => {
             try {
               await blockUser(userId);
+              track('user_blocked');
               const spaces = await mySpacesWith(userId);
               if (spaces.length) {
                 const list = spaces.map((s) => `• ${s.kind === 'group' ? 'Grupo' : 'Plan'}: ${s.name}`).join('\n');

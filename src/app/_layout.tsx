@@ -10,7 +10,9 @@ import { AuthProvider, useAuth } from '@/features/auth/auth-provider';
 import { useMyProfile } from '@/features/profile/hooks';
 import { accessState } from '@/features/profile/onboarding';
 import { queryClient } from '@/lib/query-client';
+import { initMonitoring, wrapRoot } from '@/lib/monitoring';
 
+initMonitoring();
 SplashScreen.preventAutoHideAsync();
 
 // "Portero": decide qué parte de la app puede ver el usuario (docs/05-plan-tecnico.md, 6.1).
@@ -47,7 +49,7 @@ function Gate() {
   );
 }
 
-export default function RootLayout() {
+function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -57,3 +59,5 @@ export default function RootLayout() {
     </QueryClientProvider>
   );
 }
+
+export default wrapRoot(RootLayout);

@@ -2,6 +2,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient, type InfiniteD
 import { useEffect } from 'react';
 
 import { useMyProfile } from '@/features/profile/hooks';
+import { track } from '@/lib/analytics';
 import {
   deleteMessage,
   getChat,
@@ -114,6 +115,7 @@ export function useSendMessage(chat: ChatRef) {
     setLocal(localId, body, 'sending');
     try {
       const saved = await sendMessage(chat, body);
+      track('message_sent', { chat: chat.kind });
       const message = await getMessage(saved.id);
       queryClient.setQueryData<Pages>(key, (data) =>
         message ? upsertMessage(data, message, localId) : removeMessage(data, localId),

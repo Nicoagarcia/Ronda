@@ -9,6 +9,7 @@ import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
 import { TextField } from '@/components/ui/text-field';
 import { useBlockFlow } from '@/features/moderation/hooks';
+import { track } from '@/lib/analytics';
 import { errorMessage } from '@/lib/errors';
 import { createReport, type ReportReason, type ReportTarget } from '@/services/moderation';
 
@@ -48,6 +49,7 @@ export default function ReportScreen() {
     setLoading(true);
     try {
       await createReport(type, id, reason, details.trim() || null);
+      track('report_sent', { target: type, reason });
       setSent(true);
     } catch (e) {
       setError(errorMessage(e));

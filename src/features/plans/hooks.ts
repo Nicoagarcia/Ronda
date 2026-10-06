@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { profileKeys } from '@/features/profile/hooks';
+import { track } from '@/lib/analytics';
 import {
   acceptSafetyNotice,
   cancelPlan,
@@ -41,7 +42,11 @@ function usePlanMutation<T, R>(fn: (input: T) => Promise<R>) {
 }
 
 export const useCreatePlan = () =>
-  usePlanMutation(({ input, groupId }: { input: PlanInput; groupId: string | null }) => createPlan(input, groupId));
+  usePlanMutation(async ({ input, groupId }: { input: PlanInput; groupId: string | null }) => {
+    const id = await createPlan(input, groupId);
+    track('plan_created', { in_group: !!groupId, private_place: input.isPrivatePlace, max_participants: input.maxParticipants });
+    return id;
+  });
 export const useUpdatePlan = (id: string) => usePlanMutation((input: PlanInput) => updatePlan(id, input));
 export const useCancelPlan = (id: string) => usePlanMutation((reason: string | null) => cancelPlan(id, reason));
 export const useLeavePlan = (id: string) => usePlanMutation(() => leavePlan(id));
@@ -54,6 +59,7 @@ export function useJoinPlan(id: string) {
     mutationFn: async ({ acceptNotice }: { acceptNotice: boolean }) => {
       if (acceptNotice) await acceptSafetyNotice();
       await joinPlan(id);
+      track('plan_joined');
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: planKeys.all });

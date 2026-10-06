@@ -2,6 +2,7 @@
 
 ## Ronda
 
+- **Al empezar, leé `docs/07-estado-del-proyecto.md`**: qué está hecho, qué falta, cómo levantarlo y trampas conocidas. Actualizalo al cerrar cada etapa.
 - Producto, decisiones y specs en `docs/`. Las specs de `docs/specs/` mandan: si el código o el plan técnico chocan con una spec, gana la spec.
 - Plan técnico, hitos y convenciones en `docs/05-plan-tecnico.md`.
 - UI, textos y comentarios en español rioplatense ("vos").

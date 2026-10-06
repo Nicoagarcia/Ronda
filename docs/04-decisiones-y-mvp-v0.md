@@ -76,6 +76,32 @@ Pregunta a responder:
 - Fotos y adjuntos en el chat.
 - Filtros por fecha y zona.
 - Planes recurrentes ("todos los sábados").
+- Login con teléfono y verificación de identidad (ver abajo).
+
+### Para el futuro: login con teléfono y verificación (pedido 2026-10-06)
+
+Como en Tinder, Happn y la mayoría de las apps de interacción social.
+
+**1. Iniciar sesión con el número de teléfono**
+- La persona ingresa su número y recibe un **código de 6 dígitos por SMS** (o por WhatsApp). Sin contraseña.
+- Supabase Auth ya lo soporta (login por teléfono con código), conectado a un proveedor de SMS como Twilio, MessageBird o Vonage. Twilio también manda el código por WhatsApp, que en Argentina suele llegar mejor y salir más barato que el SMS.
+- Tiene **costo por mensaje**: hay que ponerle límites (intentos por número y por hora) para que no lo usen para gastar plata con envíos masivos.
+- Ventaja extra: un número de teléfono es más difícil de multiplicar que un email, así que ayuda contra las cuentas falsas y contra quien vuelve después de una suspensión permanente (sumar el teléfono a `banned_emails`, o a una tabla equivalente).
+- Convive con Google y email: la persona elige cómo entrar.
+
+**2. Verificación con selfie (opcional)**
+- La persona se saca una **selfie en vivo** (con prueba de vida: girar la cabeza, parpadear) y se compara con sus fotos de perfil.
+- Si coincide, el perfil muestra una insignia **"Verificado ✓"**. Es optativa, pero da confianza a quien se encuentra con desconocidos.
+- Se puede usar para dar más confianza en lugares sensibles, por ejemplo: exigir perfil verificado para crear planes en un domicilio particular, o mostrar cuántos participantes de un plan están verificados.
+- Proveedores posibles: AWS Rekognition (comparar caras), o servicios completos de prueba de vida como FaceTec, Veriff, Persona o Sumsub.
+
+**3. Verificación de identidad (opcional)**
+- Foto del **DNI** + selfie, validados contra RENAPER (hay proveedores en Argentina que ofrecen esa validación). Confirma nombre real y edad (cierra el riesgo de menores de 18).
+- Más fricción y más costo que la selfie: conviene ofrecerla como un nivel superior, no obligatoria.
+
+**Cuidados legales**
+- Las selfies y los datos biométricos son **datos sensibles** (Ley 25.326 y criterios de la AAIP): requieren consentimiento expreso, explicar para qué se usan y por cuánto tiempo, y guardarlos lo mínimo posible. Lo ideal es que el proveedor procese la biometría y Ronda guarde solo el resultado ("verificado sí/no" y la fecha), no la cara ni el DNI.
+- Actualizar la política de privacidad y el formulario de seguridad de datos de Google Play antes de lanzarlo.
 
 ---
 
